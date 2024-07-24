@@ -16,15 +16,16 @@ const port = 4000
 
 connectDB();
 
+app.use(express.json())
+app.use(cors())
+
 
 //api endpoints
 app.use("/api/food",foodRouter)
 app.use("/images",express.static('uploads'))
+
 //middleware
 
-
-app.use(express.json())
-app.use(cors())
 
 
 app.get("/",(req,res)=>{

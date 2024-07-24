@@ -1,7 +1,6 @@
 import foodModel from "../models/foodModel.js";
+import fs from 'fs'
 
-// const fs = require('fs');
-// import fs from 'fs'
 
 //add food item
 
@@ -32,10 +31,50 @@ const addFood = async(req,res)=>{
 const listFood = async(req,res)=>{
     try{
         const foods= await foodModel.find({});
-        res.json({success:false,data:foods})
+        res.json({success:true,data:foods})
     }catch(error){
         console.log(error);
         res.json({success:false,message:"Error"})
     }
 }
-export {addFood,listFood}
+
+const removeFood = async(req,res)=>{
+    try {
+
+        const food = await foodModel.findById(req.body.id);
+        console.log(food);
+        fs.unlink(`uploads/${food.image}`,()=>{})
+    
+        await foodModel.findByIdAndDelete(req.body.id);
+        res.json({success:true,meesage:"Food Removed"})
+    } catch (error){
+        console.log(error,"hh");
+        res.json({Success:false,message:"Error"})
+     }
+}
+// const removeFood = async (req, res) => {
+//     try {
+//    const food = await foodModel.findById(req.body.id);
+  
+//       if (food) {
+//         // Use the path you provided (assuming uploads is in the parent directory)
+//         const imagePath = `uploads/${food.image}`;
+  
+//         // Delete the image file (assuming uploads is the correct path)
+//         fs.unlink(imagePath, (err) => {
+//           if (err) {
+//             console.error("Error deleting image:", err);
+//             // Handle file deletion errors gracefully (e.g., log, send error response)
+//           } else {
+//             console.log("Image deleted successfully");
+//           }
+//         });
+//       }
+//       } catch (error) {
+//       console.error(error);
+//       res.json({ success: false, message: "Error removing food" });
+//     }
+//   };
+
+
+export {addFood,listFood,removeFood}
