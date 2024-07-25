@@ -3,6 +3,7 @@ import cors from "cors";
 import connectDB from "./config/db.js";
 import foodRouter from "./routes/foodRoute.js";
 
+// npm run server 
 
 
 

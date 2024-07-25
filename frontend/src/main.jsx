@@ -12,3 +12,6 @@ ReactDOM.createRoot(document.getElementById("root")).render(
     </StoreContextProvider>
   </BrowserRouter>
 );
+// frontend :npm run dev
+// backend :npm run server
+// admin :npm run dev
