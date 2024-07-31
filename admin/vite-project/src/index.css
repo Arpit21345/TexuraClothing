@@ -21,9 +21,8 @@
   .app-content{
     display: flex;
   }
-  html, body, #root {
-    background-color: black;
-    height: 100%;
-    color: white; /* This ensures the text is visible against the black background */
-    font-family: Arial, sans-serif; /* Optional: Set a default font for the page */
+  .flex-col{
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
   }
