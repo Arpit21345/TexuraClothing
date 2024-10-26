@@ -21,6 +21,7 @@ const foodSchema =new mongoose.Schema({
         type:String,
         required:true,
     }
+    // addd custom here 
 })
 const foodModel = mongoose.models.food || mongoose.model("food",foodSchema);
 
