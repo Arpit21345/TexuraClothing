@@ -23,6 +23,10 @@ hr{
   display: flex;
 
 }
+
+.cursor{
+  cursor: pointer;
+}
 .app{
   width:80%;
   margin: auto;
