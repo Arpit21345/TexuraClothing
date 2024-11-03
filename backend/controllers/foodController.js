@@ -47,7 +47,7 @@ const removeFood = async(req,res)=>{
         fs.unlink(`uploads/${food.image}`,()=>{})
     
         await foodModel.findByIdAndDelete(req.body.id);
-        res.json({success:true,meesage:"Food Removed"})
+        res.json({success:true,message:"Food Removed"})
     } catch (error){
         console.log(error,"hh");
         res.json({Success:false,message:"Error"})
