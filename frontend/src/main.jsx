@@ -15,3 +15,4 @@ ReactDOM.createRoot(document.getElementById("root")).render(
 // frontend :npm run dev
 // backend :npm run server
 // admin :npm run dev
+// change the link of frontend url in ordercontroller.js

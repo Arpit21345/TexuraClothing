@@ -72,7 +72,7 @@ const navigate = useNavigate();
           <div className="navbar-profile">
             <img src={assets.profile_icon} alt="Profile Icon" />
             <ul className="nav-profile-dropdown">
-              <li>
+              <li onClick={()=>navigate('/myorders')}>
                 <img src={assets.bag_icon} alt="Bag Icon" />
                 <p>Orders</p>
               </li>
