@@ -3,6 +3,7 @@ import { loginUser, registerUser } from "../middleware/controllers/userControlle
 
 const userRouter = express.Router();
 
+// Routes
 userRouter.post("/register", registerUser);
 userRouter.post("/login", loginUser);
 

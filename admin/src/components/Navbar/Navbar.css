@@ -1,14 +1,18 @@
-.navbar{
+.navbar {
     display: flex;
-    justify-content:space-between;
+    justify-content: space-between;
     align-items: center;
     padding: 8px 4%;
+    background-color: #fff; /* Optional: Ensures visibility */
+    border-bottom: 1px solid #ddd; /* Optional: Adds separation */
+}
 
+.navbar .logo {
+    width: min(10%, 80px);
 }
-.navbar .logo{
-    width: max(10%,80px);
-   
-}
-.navbar .profile{
-    width:40px;
+
+.navbar .profile {
+    width: 40px;
+    cursor: pointer; /* Adds interactivity */
+    border-radius: 50%; /* Optional: Circular profile image */
 }
