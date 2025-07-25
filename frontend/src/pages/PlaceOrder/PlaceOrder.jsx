@@ -1,11 +1,13 @@
 import { useContext, useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import './PlaceOrder.css';
 import axios from 'axios';
 import { StoreContext } from '../../context/StoreContext';
 
 const PlaceOrder = () => {
   const { getTotalCartAmount, token, textile_list, cartItems, url } = useContext(StoreContext);
+  const location = useLocation();
+  const appliedPromo = location.state?.appliedPromo || null;
 
   const [data, setData] = useState({
     firstName: "",
@@ -25,6 +27,18 @@ const PlaceOrder = () => {
     setData(data => ({ ...data, [name]: value }));
   };
 
+  const calculateDiscountAmount = () => {
+    if (!appliedPromo) return 0;
+    return Math.round((getTotalCartAmount() * appliedPromo.discount) / 100);
+  };
+
+  const getFinalTotal = () => {
+    const subtotal = getTotalCartAmount();
+    const deliveryFee = subtotal === 0 ? 0 : 2;
+    const discount = calculateDiscountAmount();
+    return Math.max(0, subtotal + deliveryFee - discount);
+  };
+
   const placeOrder = async (event) => {
     event.preventDefault();
     let orderItems = [];
@@ -38,7 +52,12 @@ const PlaceOrder = () => {
     let orderData = {
       address: data,
       items: orderItems,
-      amount: getTotalCartAmount() + 2,
+      amount: getFinalTotal(),
+      promoCode: appliedPromo ? {
+        code: appliedPromo.code,
+        discount: appliedPromo.discount,
+        discountAmount: calculateDiscountAmount()
+      } : null
     };
     try {
       let response = await axios.post(`${url}/api/order/place`, orderData, { headers: { token } });
@@ -92,12 +111,26 @@ const PlaceOrder = () => {
             <hr />
             <div className="cart-total-details">
               <p>Delivery Fee</p>
-              <p>${2}</p>
+              <p>${getTotalCartAmount() === 0 ? 0 : 2}</p>
             </div>
+            {appliedPromo && (
+              <>
+                <hr />
+                <div className="cart-total-details promo-discount">
+                  <p style={{color: '#28a745'}}>Discount ({appliedPromo.code})</p>
+                  <p style={{color: '#28a745'}}>-${calculateDiscountAmount()}</p>
+                </div>
+                <div className="promo-applied-badge">
+                  <small style={{color: '#28a745', fontWeight: 'bold'}}>
+                    🎉 {appliedPromo.discount}% OFF Applied!
+                  </small>
+                </div>
+              </>
+            )}
             <hr />
             <div className="cart-total-details">
               <b>Total</b>
-              <b>${getTotalCartAmount() === 0 ? 0 : getTotalCartAmount() + 2}</b>
+              <b>${getFinalTotal()}</b>
             </div>
           </div>
           <button type='submit'>PROCEED TO PAYMENT</button>

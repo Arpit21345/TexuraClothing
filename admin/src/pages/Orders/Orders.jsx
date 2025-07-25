@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import './Orders.css';
 import { toast } from 'react-toastify';
 import axios from "axios";
@@ -9,10 +9,11 @@ const Orders = ({ url }) => {
 
   const [orders, setOrders] = useState([]);
 
-  const fetchAllOrders = async () => {
+  const fetchAllOrders = useCallback(async () => {
     try {
+      const adminToken = localStorage.getItem('adminToken');
       const response = await axios.get(`${url}/api/order/listorders`, {
-        headers: { token: localStorage.getItem('token') },
+        headers: { token: adminToken }
       });
       if (response.data.success) {
         setOrders(response.data.data);
@@ -23,15 +24,16 @@ const Orders = ({ url }) => {
       console.error('Error fetching orders:', error);
       toast.error("Error in fetching orders");
     }
-  };
+  }, [url]);
 
   const statusHandler = async (event, orderId) => {
     try {
+      const adminToken = localStorage.getItem('adminToken');
       const response = await axios.post(`${url}/api/order/updatestatus`, {
         orderId,
         status: event.target.value
       }, {
-        headers: { token: localStorage.getItem('token') },
+        headers: { token: adminToken }
       });
       if (response.data.success) {
         await fetchAllOrders();
@@ -46,7 +48,7 @@ const Orders = ({ url }) => {
 
   useEffect(() => {
     fetchAllOrders();
-  }, []);
+  }, [fetchAllOrders]);
 
   return (
     <div className="order-container">

@@ -3,16 +3,76 @@
     justify-content: space-between;
     align-items: center;
     padding: 8px 4%;
-    background-color: #fff; /* Optional: Ensures visibility */
-    border-bottom: 1px solid #ddd; /* Optional: Adds separation */
+    background-color: #fff;
+    border-bottom: 1px solid #ddd;
 }
 
 .navbar .logo {
     width: min(10%, 80px);
 }
 
+.navbar-right {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.admin-info {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 2px;
+}
+
+.admin-welcome {
+    font-size: 14px;
+    font-weight: 600;
+    color: #333;
+}
+
+.admin-role {
+    font-size: 12px;
+    color: #666;
+    text-transform: uppercase;
+}
+
 .navbar .profile {
     width: 40px;
-    cursor: pointer; /* Adds interactivity */
-    border-radius: 50%; /* Optional: Circular profile image */
+    height: 40px;
+    cursor: pointer;
+    border-radius: 50%;
+    border: 2px solid #e0e0e0;
+}
+
+.logout-btn {
+    background: linear-gradient(135deg, #dc3545, #c82333);
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.logout-btn:hover {
+    background: linear-gradient(135deg, #c82333, #a02834);
+    transform: translateY(-1px);
+    box-shadow: 0 3px 8px rgba(220, 53, 69, 0.3);
+}
+
+@media (max-width: 768px) {
+    .admin-info {
+        display: none;
+    }
+    
+    .navbar-right {
+        gap: 10px;
+    }
+    
+    .logout-btn {
+        padding: 6px 12px;
+        font-size: 11px;
+    }
 }
