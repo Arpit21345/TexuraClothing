@@ -5,11 +5,22 @@ node_modules
 backend/.env
 frontend/.env
 
+# Uploads and user-generated content
+uploads/
+backend/uploads/
+frontend/uploads/
+
 # Debug files
 *.log
 *.debug.html
 *.debug.pdf
+invoice-*.html
+invoice-*.pdf
 
 # Build directories
 dist/
 build/
+
+# Temporary files
+*.tmp
+*.temp
