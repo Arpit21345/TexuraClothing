@@ -18,8 +18,14 @@ const generateInvoice = async (req, res) => {
         console.log("Starting PDF generation for order:", orderId);
         console.log("HTML content length:", htmlContent.length);
         
-        // Debug: Save HTML to file for inspection
-        const debugPath = path.join(process.cwd(), `invoice-${orderId}-debug.html`);
+        // Ensure uploads directory exists
+        const uploadsDir = path.join(process.cwd(), 'uploads');
+        if (!fs.existsSync(uploadsDir)) {
+            fs.mkdirSync(uploadsDir, { recursive: true });
+        }
+        
+        // Debug: Save HTML to uploads folder for inspection
+        const debugPath = path.join(uploadsDir, `invoice-${orderId}-debug.html`);
         fs.writeFileSync(debugPath, htmlContent);
         console.log("Debug HTML saved to:", debugPath);
         
