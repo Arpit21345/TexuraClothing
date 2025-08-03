@@ -37,6 +37,9 @@ app.use("/api/promo", promoRouter);
 app.get("/", (req, res) => {
     res.send("API is working");
 });
+// this is just to test wether server is running it open a page 
+// with api working written
+
 
 // Start server
 app.listen(port, () => {

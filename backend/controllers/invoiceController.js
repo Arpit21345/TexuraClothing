@@ -1,6 +1,6 @@
-import orderModel from "../../models/orderModel.js";
-import userModel from "../../models/userModel.js";
-import textileModel from "../../models/textileModel.js";
+import orderModel from "../models/orderModel.js";
+import userModel from "../models/userModel.js";
+import textileModel from "../models/textileModel.js";
 import puppeteer from "puppeteer";
 import fs from 'fs';
 import path from 'path';
@@ -23,6 +23,11 @@ const generateInvoice = async (req, res) => {
         if (!fs.existsSync(uploadsDir)) {
             fs.mkdirSync(uploadsDir, { recursive: true });
         }
+        
+        // Debug: Save HTML to uploads folder for inspection
+        const debugPath = path.join(uploadsDir, `invoice-${orderId}-debug.html`);
+        fs.writeFileSync(debugPath, htmlContent);
+        console.log("Debug HTML saved to:", debugPath);
         
         // Create PDF using Puppeteer
         const browser = await puppeteer.launch({

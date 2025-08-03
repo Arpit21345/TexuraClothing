@@ -1,5 +1,5 @@
 import express from 'express';
-import { addtextile, listtextile, removetextile } from '../middleware/controllers/textileController.js';
+import { addtextile, listtextile, removetextile } from '../controllers/textileController.js';
 import multer from 'multer';
 import fs from 'fs';
 

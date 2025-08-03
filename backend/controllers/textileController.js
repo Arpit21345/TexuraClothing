@@ -1,4 +1,4 @@
-import textileModel from "../../models/textileModel.js";
+import textileModel from "../models/textileModel.js";
 import fs from "fs";
 
 // Add textile Item

@@ -1,5 +1,5 @@
 import express from "express";
-import { generateInvoice, getInvoiceData } from "../middleware/controllers/invoiceController.js";
+import { generateInvoice, getInvoiceData } from "../controllers/invoiceController.js";
 import authMiddleware from "../middleware/auth.js";
 
 const invoiceRouter = express.Router();
