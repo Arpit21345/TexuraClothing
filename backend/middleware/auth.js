@@ -8,10 +8,11 @@ const authMiddleware = async(req,res,next) =>{
     try{
         const token_decode = jwt.verify(token,process.env.JWT_SECRET);
         req.body.userId = token_decode.id;
+        console.log("Auth middleware - User ID:", token_decode.id); // Debug log
         next();
     }
     catch(error){
-        console.log(error);
+        console.log("Auth middleware error:", error);
         res.json({success:false,message:"Error"})
         
     }

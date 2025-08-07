@@ -1,5 +1,6 @@
 import { createContext, useEffect, useState } from "react";
 import axios from "axios";
+import PropTypes from "prop-types";
 
 export const StoreContext = createContext(null);
 
@@ -9,6 +10,14 @@ const StoreContextProvider = (props) => {
   const [token, setToken] = useState("");
 
   const [textile_list, setTextileList] = useState([]);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [activeFilters, setActiveFilters] = useState({});
+  const [profileUpdateTrigger, setProfileUpdateTrigger] = useState(0);
+
+  // Function to trigger profile refresh
+  const refreshProfile = () => {
+    setProfileUpdateTrigger(prev => prev + 1);
+  };
 
   const addToCart = async (itemId) => {
     if (!cartItems[itemId]) {
@@ -77,6 +86,12 @@ const StoreContextProvider = (props) => {
     url,
     token,
     setToken,
+    searchTerm,
+    setSearchTerm,
+    activeFilters,
+    setActiveFilters,
+    profileUpdateTrigger,
+    refreshProfile,
   };
 
   return (
@@ -87,3 +102,7 @@ const StoreContextProvider = (props) => {
 };
 
 export default StoreContextProvider;
+
+StoreContextProvider.propTypes = {
+  children: PropTypes.node.isRequired,
+};

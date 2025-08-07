@@ -1,94 +1,201 @@
 .add {
-    width: 70%;
-    margin-left: max(5vw, 25px);
-    margin-top: 50px;
-    color: #6d6d6d;
+    width: 100%;
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 30px;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    margin-top: 30px;
+    color: #333;
     font-size: 1rem;
+}
+
+.add h2 {
+    margin: 0 0 30px 0;
+    color: #333;
+    font-size: 28px;
+    font-weight: 600;
+    border-bottom: 2px solid #f0f0f0;
+    padding-bottom: 15px;
 }
 
 .add form {
     display: flex;
     flex-direction: column;
-    gap: 20px;
+    gap: 25px;
 }
 
+/* Image Upload Section */
 .add-img-upload {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 10px;
+    gap: 15px;
+    padding: 30px;
+    border: 2px dashed #ddd;
+    border-radius: 12px;
+    background: #fafafa;
+    transition: all 0.3s ease;
+}
+
+.add-img-upload:hover {
+    border-color: #007bff;
+    background: #f8f9ff;
 }
 
 .add-img-upload img {
     width: 120px;
+    height: 120px;
+    object-fit: cover;
+    border-radius: 8px;
     cursor: pointer;
-    transition: transform 0.2s ease-in-out;
+    transition: all 0.3s ease;
+    border: 2px solid transparent;
 }
 
 .add-img-upload img:hover {
     transform: scale(1.05);
+    border-color: #007bff;
+    box-shadow: 0 4px 12px rgba(0, 123, 255, 0.2);
+}
+
+.upload-text {
+    color: #666;
+    font-size: 14px;
+    text-align: center;
+}
+
+/* Form Groups */
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.form-group label {
+    font-weight: 600;
+    color: #333;
+    font-size: 15px;
 }
 
 .add-product-name, 
 .add-product-description {
-    width: max(40%, 280px);
+    width: 100%;
 }
 
 .add-product-name input,
 .add-product-description textarea {
     width: 100%;
-    padding: 10px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    font-size: 0.9rem;
-    transition: border-color 0.3s ease-in-out;
+    padding: 12px 15px;
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    font-size: 14px;
+    font-family: inherit;
+    transition: all 0.3s ease;
+    background: #fafafa;
 }
 
 .add-product-name input:focus,
 .add-product-description textarea:focus {
-    border-color: #000;
+    border-color: #007bff;
+    background: white;
     outline: none;
+    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
 }
 
+.add-product-description textarea {
+    min-height: 120px;
+    resize: vertical;
+}
+
+/* Category and Price Section */
 .add-category-price {
-    display: flex;
-    gap: 30px;
-    flex-wrap: wrap;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+}
+
+.add-category-price .form-group {
+    flex: 1;
 }
 
 .add-category-price select,
 .add-category-price input {
-    max-width: 160px;
-    padding: 10px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    font-size: 0.9rem;
-    transition: border-color 0.3s ease-in-out;
+    width: 100%;
+    padding: 12px 15px;
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    font-size: 14px;
+    font-family: inherit;
+    transition: all 0.3s ease;
+    background: #fafafa;
+    cursor: pointer;
 }
 
 .add-category-price select:focus,
 .add-category-price input:focus {
-    border-color: #000;
+    border-color: #007bff;
+    background: white;
     outline: none;
+    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
 }
 
+/* Submit Button */
 .add-btn {
-    max-width: 120px;
+    width: fit-content;
     border: none;
-    padding: 10px;
-    background-color: black;
+    padding: 15px 30px;
+    background: linear-gradient(135deg, #007bff, #0056b3);
     color: white;
     cursor: pointer;
-    font-size: 0.9rem;
-    border-radius: 5px;
-    transition: background-color 0.3s, transform 0.2s ease-in-out;
+    font-size: 16px;
+    font-weight: 600;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 12px rgba(0, 123, 255, 0.3);
+    align-self: flex-start;
 }
 
 .add-btn:hover {
-    background-color: #333;
-    transform: scale(1.05);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(0, 123, 255, 0.4);
 }
 
 .add-btn:active {
-    transform: scale(0.95);
+    transform: translateY(0);
+    box-shadow: 0 2px 8px rgba(0, 123, 255, 0.3);
+}
+
+.add-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .add {
+        margin: 20px 15px;
+        padding: 20px;
+    }
+    
+    .add h2 {
+        font-size: 24px;
+    }
+    
+    .add-category-price {
+        grid-template-columns: 1fr;
+        gap: 15px;
+    }
+    
+    .add-img-upload {
+        padding: 20px;
+    }
+    
+    .add-btn {
+        width: 100%;
+        text-align: center;
+    }
 }

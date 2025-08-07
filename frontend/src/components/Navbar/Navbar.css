@@ -58,34 +58,84 @@
 
 .navbar-profile {
     position: relative;
+    cursor: pointer;
+}
+
+.navbar-profile-pic {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    overflow: hidden;
+    border: 2px solid #e0e0e0;
+    transition: all 0.3s ease;
+}
+
+.navbar-profile:hover .navbar-profile-pic {
+    border-color: tomato;
+    transform: scale(1.05);
+}
+
+.profile-avatar {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
 }
 
 .nav-profile-dropdown {
     position: absolute;
     display: none;
     right: 0;
-    z-index: 1;
+    top: 100%;
+    margin-top: 5px;
+    z-index: 1000;
+    min-width: 180px;
 }
 
-.navbar-profile:hover .nav-profile-dropdown {
+.navbar-profile:hover .nav-profile-dropdown,
+.nav-profile-dropdown:hover {
     display: flex;
     flex-direction: column;
-    gap: 10px;
-    background-color: #fff2ef;
-    padding: 12px 25px;
-    border-radius: 4px;
-    border: 1px solid tomato;
-    outline: 2px solid white;
+    gap: 0;
+    background-color: white;
+    padding: 10px 0;
+    border-radius: 8px;
+    border: 1px solid #e0e0e0;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
     list-style: none;
 }
-.nav-profile-dropdown li{
+
+.nav-profile-dropdown li {
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 12px;
     cursor: pointer;
+    padding: 12px 20px;
+    transition: background-color 0.2s ease;
+    border: none;
 }
+
+.nav-profile-dropdown li:hover {
+    background-color: #f8f9fa;
+}
+
+.nav-profile-dropdown li p {
+    margin: 0;
+    font-size: 14px;
+    font-weight: 500;
+    color: #333;
+}
+
 .nav-profile-dropdown img {
-    width: 20px;
+    width: 18px;
+    height: 18px;
+    opacity: 0.7;
+}
+
+.nav-profile-dropdown hr {
+    margin: 5px 15px;
+    border: none;
+    border-top: 1px solid #e0e0e0;
 }
 
 @media (max-width:1050px){
@@ -104,6 +154,10 @@
     }
     .navbar-right button{
         padding: 8px 25px;
+    }
+    .navbar-profile-pic {
+        width: 36px;
+        height: 36px;
     }
 }
 
@@ -125,9 +179,26 @@
         padding: 7px 20px;
         font-size: 15px;
     }
+    .navbar-profile-pic {
+        width: 32px;
+        height: 32px;
+    }
+    .nav-profile-dropdown {
+        min-width: 160px;
+        right: -10px;
+    }
 }
+
 @media (max-width:750px){
     .navbar-menu{
         display: none;
+    }
+    .navbar-profile-pic {
+        width: 30px;
+        height: 30px;
+    }
+    .nav-profile-dropdown {
+        min-width: 140px;
+        right: -20px;
     }
 }

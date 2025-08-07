@@ -29,15 +29,85 @@ const addtextile = async (req, res) => {
     }
 };
 
-// List all textile Items
+// List all textile Items with Search & Filtering
 const listtextile = async (req, res) => {
     try {
-        const textiles = await textileModel.find({});
-        res.json({ success: true, data: textiles });
+        // Get query parameters
+        const { 
+            search = '', 
+            category = '', 
+            minPrice = 0, 
+            maxPrice = 10000, 
+            sortBy = 'name', 
+            sortOrder = 'asc',
+            page = 1,
+            limit = 12
+        } = req.query;
+
+        // Build query object
+        let query = {};
+
+        // Search functionality
+        if (search) {
+            query.$or = [
+                { name: { $regex: search, $options: 'i' } },
+                { description: { $regex: search, $options: 'i' } }
+            ];
+        }
+
+        // Category filter
+        if (category && category !== 'All') {
+            query.category = category;
+        }
+
+        // Price range filter
+        query.price = { 
+            $gte: Number(minPrice), 
+            $lte: Number(maxPrice) 
+        };
+
+        // Sort object
+        const sort = {};
+        sort[sortBy] = sortOrder === 'desc' ? -1 : 1;
+
+        // Pagination
+        const skip = (Number(page) - 1) * Number(limit);
+
+        // Execute query
+        const textiles = await textileModel
+            .find(query)
+            .sort(sort)
+            .skip(skip)
+            .limit(Number(limit));
+
+        // Get total count for pagination
+        const total = await textileModel.countDocuments(query);
+
+        res.json({ 
+            success: true, 
+            data: textiles,
+            pagination: {
+                page: Number(page),
+                limit: Number(limit),
+                total,
+                pages: Math.ceil(total / Number(limit))
+            }
+        });
 
     } catch (error) {
         console.error("Error fetching textile list:", error);
         res.json({ success: false, message: "Error fetching textile list" });
+    }
+};
+
+// Get all categories
+const getCategories = async (req, res) => {
+    try {
+        const categories = await textileModel.distinct('category');
+        res.json({ success: true, data: categories });
+    } catch (error) {
+        console.error("Error fetching categories:", error);
+        res.json({ success: false, message: "Error fetching categories" });
     }
 };
 
@@ -70,4 +140,4 @@ const removetextile = async (req, res) => {
     }
 };
 
-export { addtextile, listtextile, removetextile };
+export { addtextile, listtextile, removetextile, getCategories };

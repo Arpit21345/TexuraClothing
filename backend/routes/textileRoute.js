@@ -1,5 +1,5 @@
 import express from 'express';
-import { addtextile, listtextile, removetextile } from '../controllers/textileController.js';
+import { addtextile, listtextile, removetextile, getCategories } from '../controllers/textileController.js';
 import multer from 'multer';
 import fs from 'fs';
 
@@ -22,6 +22,7 @@ const upload = multer({ storage });
 
 textileRouter.post("/add", upload.single("image"), addtextile);
 textileRouter.get("/list", listtextile);
+textileRouter.get("/categories", getCategories);
 textileRouter.delete("/remove", removetextile);  // Changed to DELETE
 
 export default textileRouter;

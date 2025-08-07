@@ -8,19 +8,16 @@ const placeOrder = async (req, res) => {
     const frontend_url = "http://localhost:5173";
 
     try {
-        // Create a new order in the database
         const newOrder = new orderModel({
             userId: req.body.userId,
             items: req.body.items,
             amount: req.body.amount,
             address: req.body.address,
         });
-        await newOrder.save();
 
-        // Clear the user's cart data
+        await newOrder.save();
         await userModel.findByIdAndUpdate(req.body.userId, { cartData: {} });
 
-        // Create line items for the Stripe session
         const line_items = req.body.items.map((item) => ({
             price_data: {
                 currency: "inr",
@@ -32,7 +29,6 @@ const placeOrder = async (req, res) => {
             quantity: item.quantity,
         }));
 
-        // Add delivery charges to the line items
         line_items.push({
             price_data: {
                 currency: "inr",
@@ -44,7 +40,6 @@ const placeOrder = async (req, res) => {
             quantity: 1,
         });
 
-        // Create a Stripe checkout session
         const session = await stripe.checkout.sessions.create({
             line_items: line_items,
             mode: "payment",

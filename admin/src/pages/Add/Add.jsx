@@ -3,6 +3,7 @@ import { useState } from "react";
 import { assets } from "../../assets/assets";
 import axios from "axios";
 import { toast } from "react-toastify";
+import PropTypes from "prop-types";
 
 const Add = ({ url }) => {
   const [image, setImage] = useState(false);
@@ -50,15 +51,16 @@ const Add = ({ url }) => {
 
   return (
     <div className="add">
+      <h2>Add New Product</h2>
       <form className="flex-col" onSubmit={onSubmitHandler}>
         <div className="add-img-upload flex-col">
-          <p>Upload Image</p>
           <label htmlFor="image">
             <img
               src={image ? URL.createObjectURL(image) : assets.upload_area}
               alt="Upload"
             />
           </label>
+          <p className="upload-text">Click to upload product image</p>
           <input
             type="file"
             id="image"
@@ -68,24 +70,24 @@ const Add = ({ url }) => {
           />
         </div>
 
-        <div className="add-product-name flex-col">
-          <p>Product Name</p>
+        <div className="form-group add-product-name">
+          <label>Product Name</label>
           <input
             type="text"
             name="name"
-            placeholder="Type here"
+            placeholder="Enter product name"
             value={data.name}
             onChange={onChangeHandler}
             required
           />
         </div>
 
-        <div className="add-product-description flex-col">
-          <p>Product Description</p>
+        <div className="form-group add-product-description">
+          <label>Product Description</label>
           <textarea
             name="description"
             rows="6"
-            placeholder="Write content here"
+            placeholder="Enter detailed product description"
             value={data.description}
             onChange={onChangeHandler}
             required
@@ -93,8 +95,8 @@ const Add = ({ url }) => {
         </div>
 
         <div className="add-category-price">
-          <div className="add-category flex-col">
-            <p>Product Category</p>
+          <div className="form-group add-category">
+            <label>Product Category</label>
             <select name="category" value={data.category} onChange={onChangeHandler}>
               <option value="Fabric">Fabric</option>
               <option value="Clothing">Clothing</option>
@@ -107,23 +109,29 @@ const Add = ({ url }) => {
             </select>
           </div>
 
-          <div className="add-price flex-col">
-            <p>Product Price</p>
+          <div className="form-group add-price">
+            <label>Product Price ($)</label>
             <input
               type="number"
               name="price"
-              placeholder="$20"
+              placeholder="20"
               value={data.price}
               onChange={onChangeHandler}
+              min="0"
+              step="0.01"
               required
             />
           </div>
         </div>
 
-        <button type="submit" className="add-btn">ADD</button>
+        <button type="submit" className="add-btn">Add Product</button>
       </form>
     </div>
   );
+};
+
+Add.propTypes = {
+  url: PropTypes.string.isRequired,
 };
 
 export default Add;
