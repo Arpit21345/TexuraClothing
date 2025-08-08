@@ -11,18 +11,25 @@ const createToken = (id) => {
 // 🟢 LOGIN USER
 const loginUser = async (req, res) => {
     const { email, password } = req.body;
+    
+    console.log("Login attempt:", { email, password: password ? "***provided***" : "missing" });
 
     try {
         if (!email || !password) {
+            console.log("Missing fields - email:", !!email, "password:", !!password);
             return res.status(400).json({ success: false, message: "All fields are required" });
         }
 
         const user = await userModel.findOne({ email });
+        console.log("User lookup result:", user ? `Found user: ${user.name}` : "User not found");
+        
         if (!user) {
             return res.status(404).json({ success: false, message: "User does not exist" });
         }
 
         const isMatch = await bcrypt.compare(password, user.password);
+        console.log("Password match result:", isMatch);
+        
         if (!isMatch) {
             return res.status(401).json({ success: false, message: "Invalid credentials" });
         }
@@ -31,6 +38,7 @@ const loginUser = async (req, res) => {
         await userModel.findByIdAndUpdate(user._id, { lastLogin: new Date() });
 
         const token = createToken(user._id);
+        console.log("Login successful for user:", user.email);
         res.status(200).json({ success: true, token });
     } catch (error) {
         console.error("Login Error:", error);

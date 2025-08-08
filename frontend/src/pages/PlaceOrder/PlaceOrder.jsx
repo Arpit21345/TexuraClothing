@@ -41,6 +41,16 @@ const PlaceOrder = () => {
 
   const placeOrder = async (event) => {
     event.preventDefault();
+    
+    // Validate form data
+    const requiredFields = ['firstName', 'lastName', 'email', 'street', 'city', 'state', 'zipcode', 'country', 'phone'];
+    const missingFields = requiredFields.filter(field => !data[field].trim());
+    
+    if (missingFields.length > 0) {
+      alert(`Please fill in all required fields: ${missingFields.join(', ')}`);
+      return;
+    }
+
     let orderItems = [];
     textile_list.forEach((item) => {
       if (cartItems[item._id] > 0) {
@@ -49,6 +59,13 @@ const PlaceOrder = () => {
         orderItems.push(itemInfo);
       }
     });
+
+    if (orderItems.length === 0) {
+      alert("Your cart is empty!");
+      navigate('/cart');
+      return;
+    }
+
     let orderData = {
       address: data,
       items: orderItems,
@@ -59,16 +76,38 @@ const PlaceOrder = () => {
         discountAmount: calculateDiscountAmount()
       } : null
     };
+
+    console.log("Placing order with data:", orderData);
+    
     try {
-      let response = await axios.post(`${url}/api/order/place`, orderData, { headers: { token } });
+      let response = await axios.post(`${url}/api/order/place`, orderData, { 
+        headers: { 
+          token,
+          'Content-Type': 'application/json'
+        } 
+      });
+      
+      console.log("Order response:", response.data);
+      
       if (response.data.success) {
         const { session_url } = response.data;
         window.location.replace(session_url);
       } else {
-        alert("Error");
+        console.error("Order failed:", response.data);
+        alert(`Order failed: ${response.data.message || 'Unknown error'}`);
       }
     } catch (error) {
       console.error("Order placement failed:", error);
+      if (error.response) {
+        console.error("Error response:", error.response.data);
+        alert(`Error: ${error.response.data.message || 'Server error'}`);
+      } else if (error.request) {
+        console.error("No response received:", error.request);
+        alert("Network error: Unable to connect to server");
+      } else {
+        console.error("Error:", error.message);
+        alert(`Error: ${error.message}`);
+      }
     }
   };
 

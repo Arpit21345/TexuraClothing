@@ -1,6 +1,8 @@
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
+import path from "path";
+import { fileURLToPath } from 'url';
 import connectDB from "./config/db.js";
 import textileRouter from "./routes/textileRoute.js";
 import userRouter from "./routes/userRoute.js";
@@ -10,8 +12,12 @@ import invoiceRouter from "./routes/invoiceRoute.js";
 import adminRouter from "./routes/adminRoute.js";
 import promoRouter from "./routes/promoRoute.js";
 
-// Load environment variables
-dotenv.config();
+// Get the directory name in ES modules
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// Load environment variables with explicit path
+dotenv.config({ path: path.join(__dirname, '.env') });
 
 // App config
 const app = express();

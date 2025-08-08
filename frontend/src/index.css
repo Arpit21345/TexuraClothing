@@ -8,15 +8,43 @@
 }
 body{
   min-height: 100vh;
+  line-height: 1.6;
 }
 a{
   text-decoration: none;
   color: inherit;
 }
 .app{
-  width:80%;
+  width: 80%;
   margin: auto;
+  max-width: 1400px;
 }
+
+/* Improved responsive breakpoints */
+@media (max-width: 1200px) {
+  .app {
+    width: 85%;
+  }
+}
+
+@media (max-width: 992px) {
+  .app {
+    width: 90%;
+  }
+}
+
+@media (max-width: 768px) {
+  .app {
+    width: 95%;
+  }
+}
+
+@media (max-width: 480px) {
+  .app {
+    width: 98%;
+  }
+}
+
 @keyframes fadeIn {
   0% {
     opacity: 0;

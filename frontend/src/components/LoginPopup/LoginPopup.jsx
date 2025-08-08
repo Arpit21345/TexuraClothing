@@ -3,6 +3,7 @@ import './LoginPopup.css';
 import { assets } from '../../assets/assets';
 import { StoreContext } from './../../context/StoreContext';
 import axios from "axios";
+import PropTypes from 'prop-types';
 
 const LoginPopup = ({ setShowLogin }) => {
   const { url, setToken } = useContext(StoreContext);
@@ -21,6 +22,13 @@ const LoginPopup = ({ setShowLogin }) => {
 
   const onLogin = async (event) => {
     event.preventDefault();
+    
+    console.log("Login attempt with data:", { 
+      email: data.email, 
+      password: data.password ? "***hidden***" : "empty",
+      state: currState 
+    });
+    
     let newUrl = url;
     if (currState === "login") {
       newUrl += "/api/user/login";
@@ -28,14 +36,30 @@ const LoginPopup = ({ setShowLogin }) => {
       newUrl += "/api/user/register";
     }
 
-    const response = await axios.post(newUrl, data);
+    try {
+      const response = await axios.post(newUrl, data);
+      console.log("Login response:", response.data);
 
-    if (response.data.success) {
-      setToken(response.data.token);
-      localStorage.setItem("token", response.data.token);
-      setShowLogin(false);
-    } else {
-      alert(response.data.message);
+      if (response.data.success) {
+        setToken(response.data.token);
+        localStorage.setItem("token", response.data.token);
+        setShowLogin(false);
+      } else {
+        console.error("Login failed:", response.data.message);
+        alert(response.data.message);
+      }
+    } catch (error) {
+      console.error("Login error:", error);
+      if (error.response) {
+        console.error("Error response:", error.response.data);
+        alert(`Login failed: ${error.response.data.message || 'Unknown error'}`);
+      } else if (error.request) {
+        console.error("No response received:", error.request);
+        alert("Network error: Unable to connect to server");
+      } else {
+        console.error("Error:", error.message);
+        alert(`Error: ${error.message}`);
+      }
     }
   };
 
@@ -62,9 +86,20 @@ const LoginPopup = ({ setShowLogin }) => {
           ? <p>Create a new account? <span onClick={() => setCurrState("Sign Up")}>Click Here</span></p>
           : <p>Already have an account? <span onClick={() => setCurrState("login")}>Login Here</span></p>
         }
+        
+        {/* Admin Access Link */}
+        <div className="admin-access-link">
+          <p>
+            Admin? <span onClick={() => window.open('http://localhost:5174', '_blank')}>Login as Admin</span>
+          </p>
+        </div>
       </form>
     </div>
   );
+};
+
+LoginPopup.propTypes = {
+  setShowLogin: PropTypes.func.isRequired,
 };
 
 export default LoginPopup;

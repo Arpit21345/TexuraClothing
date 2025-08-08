@@ -29,10 +29,11 @@
 
 .login-popup-title h2 {
     margin: 0;
+    color: #333;
 }
 
 .login-popup-title img {
-    width: 20px;
+    width: 16px;
     cursor: pointer;
 }
 
@@ -85,4 +86,29 @@
 .login-popup p span {
     color: tomato;
     cursor: pointer;
+}
+
+/* Admin Access Link */
+.admin-access-link {
+    margin-top: 15px;
+    padding-top: 15px;
+    border-top: 1px solid #e0e0e0;
+    text-align: center;
+}
+
+.admin-access-link p {
+    font-size: 14px;
+    color: #666;
+    margin: 0;
+}
+
+.admin-access-link span {
+    color: #007bff !important;
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: underline;
+}
+
+.admin-access-link span:hover {
+    color: #0056b3 !important;
 }
