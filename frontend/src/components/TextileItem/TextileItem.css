@@ -57,6 +57,23 @@
     border-radius: 50%;
 }
 
+.textile-item-img-container .add.disabled {
+    opacity: 0.5;
+    pointer-events: none;
+}
+
+.stock-flag {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    background: #f8d7da;
+    color: #721c24;
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
 .textile-item-counter {
     position: absolute;
     bottom: 15px;
@@ -71,4 +88,14 @@
 
 .textile-item-counter img {
     width: 30px;
+}
+
+.textile-item-counter img.disabled {
+    opacity: 0.4;
+    pointer-events: none;
+}
+
+.textile-item-stock {
+    font-size: 12px;
+    color: #6c757d;
 }

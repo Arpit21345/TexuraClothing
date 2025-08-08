@@ -1,6 +1,6 @@
 .list-table-format {
     display: grid;
-    grid-template-columns: 0.5fr 2fr 1fr 1fr 0.5fr;
+    grid-template-columns: 0.5fr 2fr 1fr 1fr 0.7fr 0.5fr;
     align-items: center;
     gap: 15px;
     padding: 15px 20px;
@@ -72,7 +72,7 @@
 /* Enhanced responsive design */
 @media (max-width: 1024px) {
     .list-table-format {
-        grid-template-columns: 0.5fr 2fr 1fr 1fr 0.5fr;
+    grid-template-columns: 0.5fr 2fr 1fr 0.8fr 0.6fr 0.5fr;
         gap: 12px;
         padding: 12px 15px;
         font-size: 13px;
@@ -90,7 +90,7 @@
 
 @media (max-width: 768px) {
     .list-table-format {
-        grid-template-columns: 0.6fr 2.5fr 1.2fr 0.7fr;
+    grid-template-columns: 0.6fr 2.5fr 1.2fr 0.9fr 0.7fr;
         gap: 10px;
         padding: 10px 12px;
         font-size: 12px;
@@ -105,13 +105,13 @@
         font-size: 15px;
     }
     
-    /* Hide price column on mobile */
+    /* Hide price column on tablet */
     .list-table-format > :nth-child(4) {
         display: none;
     }
     
     .list-table-format {
-        grid-template-columns: 0.6fr 2.5fr 1.2fr 0.7fr;
+        grid-template-columns: 0.6fr 2.5fr 1.2fr 0.9fr 0.7fr;
     }
 }
 
@@ -137,9 +137,10 @@
         padding: 3px;
     }
     
-    /* Hide category and price columns */
+    /* Hide category, price and stock columns */
     .list-table-format > :nth-child(3),
-    .list-table-format > :nth-child(4) {
+    .list-table-format > :nth-child(4),
+    .list-table-format > :nth-child(5) {
         display: none;
     }
     
@@ -170,4 +171,47 @@
         padding: 25px 10px;
         font-size: 13px;
     }
+}
+
+/* Stock badge styles */
+.stock-badge {
+    display: inline-block;
+    min-width: 36px;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-weight: 600;
+    font-size: 12px;
+    text-align: center;
+}
+.stock-controls {
+    display: inline-flex;
+    gap: 6px;
+    margin-left: 8px;
+}
+.stock-controls button {
+    padding: 2px 8px;
+    font-size: 12px;
+    border-radius: 6px;
+    border: 1px solid #ddd;
+    background: #f8f9fa;
+    cursor: pointer;
+}
+.stock-controls button:hover {
+    background: #eef2f7;
+}
+.stock-controls button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+.stock-badge.ok {
+    background: #e6f4ea;
+    color: #1e7e34;
+}
+.stock-badge.low {
+    background: #fff3cd;
+    color: #856404;
+}
+.stock-badge.zero {
+    background: #f8d7da;
+    color: #721c24;
 }

@@ -1,5 +1,6 @@
 import orderModel from "../models/orderModel.js";
 import userModel from "../models/userModel.js";
+import textileModel from "../models/textileModel.js";
 import Stripe from "stripe";
 
 // Don't initialize Stripe here - do it in the function where env vars are available
@@ -34,6 +35,42 @@ const placeOrder = async (req, res) => {
         
         if (!req.body.amount || req.body.amount <= 0) {
             return res.json({ success: false, message: "Invalid order amount" });
+        }
+
+        // Verify stock availability before creating order/session
+        const requested = req.body.items || [];
+        const idList = requested
+            .map((it) => it._id || it.id)
+            .filter(Boolean);
+
+        if (idList.length === 0) {
+            return res.json({ success: false, message: "No valid items provided" });
+        }
+
+        const products = await textileModel.find({ _id: { $in: idList } });
+        const productMap = new Map(products.map((p) => [String(p._id), p]));
+
+        const insufficient = [];
+        for (const it of requested) {
+            const pid = String(it._id || it.id);
+            const qty = Number(it.quantity) || 0;
+            const prod = productMap.get(pid);
+            if (!prod) {
+                insufficient.push({ id: pid, reason: "Not found" });
+                continue;
+            }
+            if (qty <= 0) {
+                insufficient.push({ id: pid, reason: "Invalid quantity" });
+                continue;
+            }
+            if (prod.stock < qty) {
+                insufficient.push({ id: pid, name: prod.name, available: prod.stock, requested: qty });
+            }
+        }
+
+        if (insufficient.length > 0) {
+            console.warn("Insufficient stock for:", insufficient);
+            return res.json({ success: false, message: "Some items are out of stock or exceed available quantity", details: insufficient });
         }
 
         const newOrder = new orderModel({
@@ -77,7 +114,7 @@ const placeOrder = async (req, res) => {
 
         console.log("Creating Stripe session with line items:", line_items);
 
-        const session = await stripe.checkout.sessions.create({
+    const session = await stripe.checkout.sessions.create({
             line_items: line_items,
             mode: "payment",
             success_url: `${frontend_url}/verify?success=true&orderId=${newOrder._id}`,
@@ -101,11 +138,35 @@ const verifyOrder = async (req, res) => {
 
     try {
         if (success === "true") {
-            const updatedOrder = await orderModel.findByIdAndUpdate(orderId, { payment: true }, { new: true });
-            if (!updatedOrder) {
+            const order = await orderModel.findById(orderId);
+            if (!order) {
                 return res.json({ success: false, message: "Order not found" });
             }
-            res.json({ success: true, message: "Payment successful", orderId: updatedOrder._id });
+
+            // Avoid double-decrement if already marked paid
+            if (!order.payment) {
+                order.payment = true;
+                await order.save();
+                // Decrement stock for each item
+                for (const item of order.items) {
+                    const pid = item._id || item.id;
+                    const qty = Number(item.quantity) || 0;
+                    if (!pid || qty <= 0) continue;
+                    try {
+                        const resUpd = await textileModel.findOneAndUpdate(
+                            { _id: pid, stock: { $gte: qty } },
+                            { $inc: { stock: -qty } },
+                            { new: true }
+                        );
+                        if (!resUpd) {
+                            console.error(`Stock decrement failed for product ${pid} (qty ${qty}).`);
+                        }
+                    } catch (e) {
+                        console.error("Error decrementing stock:", e);
+                    }
+                }
+            }
+            res.json({ success: true, message: "Payment successful", orderId: order._id });
         } else {
             await orderModel.findByIdAndDelete(orderId);
             res.json({ success: false, message: "Payment failed" });

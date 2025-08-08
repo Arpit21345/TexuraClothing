@@ -11,7 +11,8 @@ const Add = ({ url }) => {
     name: "",
     description: "",
     price: "",
-    category: "Fabric", // default category
+  category: "Fabric", // default category
+  stock: "" // new stock field
   });
 
   const onChangeHandler = (event) => {
@@ -27,6 +28,7 @@ const Add = ({ url }) => {
     formData.append("description", data.description);
     formData.append("price", Number(data.price));
     formData.append("category", data.category);
+  formData.append("stock", Number(data.stock || 0));
     formData.append("image", image);
 
     try {
@@ -38,6 +40,7 @@ const Add = ({ url }) => {
           description: "",
           price: "",
           category: "Fabric",
+          stock: "",
         });
         setImage(false);
         toast.success(response.data.message);
@@ -120,6 +123,19 @@ const Add = ({ url }) => {
               min="0"
               step="0.01"
               required
+            />
+          </div>
+
+          <div className="form-group add-stock">
+            <label>Stock Count</label>
+            <input
+              type="number"
+              name="stock"
+              placeholder="e.g. 100"
+              value={data.stock}
+              onChange={onChangeHandler}
+              min="0"
+              step="1"
             />
           </div>
         </div>

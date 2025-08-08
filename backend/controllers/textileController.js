@@ -15,7 +15,9 @@ const addtextile = async (req, res) => {
             description: req.body.description,
             price: req.body.price,
             category: req.body.category,
-            image: image_filename
+            image: image_filename,
+            // optional stock from request, default to 0 if missing
+            stock: Number.isFinite(Number(req.body.stock)) ? Number(req.body.stock) : 0
         });
 
         await textile.save();
@@ -141,3 +143,57 @@ const removetextile = async (req, res) => {
 };
 
 export { addtextile, listtextile, removetextile, getCategories };
+// Admin: adjust stock for existing product
+const adjustStock = async (req, res) => {
+    try {
+    let { id, delta, set } = req.body;
+    // Coerce potential string numbers
+    const raw = { id, delta, set };
+    if (typeof delta !== 'number' && delta !== undefined) delta = Number(delta);
+    if (typeof set !== 'number' && set !== undefined) set = Number(set);
+    console.log("Adjust stock request:", { ...raw, parsed: { id, delta, set } });
+        if (!id) return res.json({ success: false, message: "Product id is required" });
+
+        let update;
+        if (typeof set === 'number') {
+            if (set < 0) return res.json({ success: false, message: "Stock cannot be negative" });
+            update = { $set: { stock: Math.floor(set) } };
+        } else if (typeof delta === 'number') {
+            const inc = Math.floor(delta);
+            if (inc === 0) return res.json({ success: true, message: "No change" });
+            if (inc > 0) {
+                // Simple increment
+                const updated = await textileModel.findByIdAndUpdate(
+                    id,
+                    { $inc: { stock: inc } },
+                    { new: true }
+                );
+                if (!updated) return res.json({ success: false, message: "Product not found for increment" });
+                return res.json({ success: true, data: updated, message: "Stock increased" });
+            } else {
+                // Decrement: ensure not going below zero atomically
+                const needed = -inc;
+                const updated = await textileModel.findOneAndUpdate(
+                    { _id: id, stock: { $gte: needed } },
+                    { $inc: { stock: inc } },
+                    { new: true }
+                );
+                if (!updated) {
+                    return res.json({ success: false, message: "Insufficient stock to decrement or product not found" });
+                }
+                return res.json({ success: true, data: updated, message: "Stock decreased" });
+            }
+        } else {
+            return res.json({ success: false, message: "Provide delta (increment) or set (absolute) value" });
+        }
+
+        const result = await textileModel.findByIdAndUpdate(id, update, { new: true });
+        if (!result) return res.json({ success: false, message: "Product not found" });
+        res.json({ success: true, data: result, message: "Stock updated" });
+    } catch (error) {
+        console.error("Error adjusting stock:", error);
+        res.json({ success: false, message: "Error adjusting stock" });
+    }
+};
+
+export { adjustStock };

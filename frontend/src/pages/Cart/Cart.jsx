@@ -43,6 +43,7 @@ const Cart = () => {
           <p>Title</p>
           <p>Price</p>
           <p>Quantity</p>
+          <p>Stock</p>
           <p>Total</p>
           <p>Remove</p>
         </div>
@@ -57,6 +58,9 @@ const Cart = () => {
                   <p>{item.name}</p>
                   <p>${item.price}</p>
                   <p>{cartItems[item._id]}</p>
+                  <p className={item.stock === 0 ? 'out' : cartItems[item._id] > item.stock ? 'warn' : ''}>
+                    {item.stock === 0 ? 'Out' : `${item.stock}`}
+                  </p>
                   <p>${item.price * cartItems[item._id]}</p>
                   <p onClick={() => removeFromCart(item._id)} className="cross">x</p>
                 </div>

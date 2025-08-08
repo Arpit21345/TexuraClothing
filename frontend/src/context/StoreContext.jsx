@@ -20,18 +20,29 @@ const StoreContextProvider = (props) => {
   };
 
   const addToCart = async (itemId) => {
-    if (!cartItems[itemId]) {
-      setCartItems((prev) => ({ ...prev, [itemId]: 1 }));
-    } else {
-      setCartItems((prev) => ({ ...prev, [itemId]: prev[itemId] + 1 }));
+    // find stock for this item
+    const itemInfo = textile_list.find((p) => p._id === itemId);
+    const maxStock = itemInfo?.stock ?? 0;
+    const currentQty = cartItems[itemId] || 0;
+
+    if (maxStock === 0) {
+      window.alert('This item is out of stock.');
+      return;
     }
+
+    if (currentQty >= maxStock) {
+      window.alert(`Only ${maxStock} left in stock.`);
+      return;
+    }
+
+    setCartItems((prev) => ({ ...prev, [itemId]: currentQty + 1 }));
     if (token) {
       await axios.post(url + "/api/cart/add", { itemId }, { headers: { token } });
     }
   };
 
   const removeFromCart = async (itemId) => {
-    setCartItems((prev) => ({ ...prev, [itemId]: prev[itemId] - 1 }));
+  setCartItems((prev) => ({ ...prev, [itemId]: Math.max(0, (prev[itemId] || 0) - 1) }));
     if (token) {
       await axios.post(url + "/api/cart/remove", { itemId }, { headers: { token } });
     }

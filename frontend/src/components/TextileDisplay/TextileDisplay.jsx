@@ -104,7 +104,8 @@ const TextileDisplay = ({ category }) => {
                   name={item.name} 
                   description={item.description} 
                   price={item.price} 
-                  image={item.image} 
+                  image={item.image}
+                  stock={item.stock}
                 />
               ))
             ) : (

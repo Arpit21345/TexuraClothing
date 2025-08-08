@@ -2,9 +2,11 @@ import "./List.css";
 import axios from "axios";
 import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
+import PropTypes from "prop-types";
 
 const List = ({ url }) => {
   const [list, setList] = useState([]);
+  const [busy, setBusy] = useState({});
 
   const fetchList = async () => {
     try {
@@ -35,8 +37,37 @@ const List = ({ url }) => {
     }
   };
 
+  const adjustStock = async (textileId, delta) => {
+    try {
+      setBusy((b) => ({ ...b, [textileId]: true }));
+      const token = localStorage.getItem('adminToken') || localStorage.getItem('token');
+      if (!token) {
+        toast.error('Admin authentication required. Please log in again.');
+        return;
+      }
+      const response = await axios.post(
+        `${url}/api/textile/adjust-stock`,
+        { id: textileId, delta },
+        { headers: { token } }
+      );
+      if (response.data.success) {
+        const updated = response.data.data;
+        setList((prev) => prev.map((p) => (p._id === textileId ? { ...p, stock: updated.stock } : p)));
+        toast.success('Stock updated');
+      } else {
+        toast.error(response.data.message || 'Failed to update stock');
+      }
+    } catch (error) {
+      console.error('Adjust stock error:', error);
+      toast.error('Failed to update stock');
+    } finally {
+      setBusy((b) => ({ ...b, [textileId]: false }));
+    }
+  };
+
   useEffect(() => {
     fetchList();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (
@@ -48,6 +79,7 @@ const List = ({ url }) => {
           <b>Name</b>
           <b>Category</b>
           <b>Price</b>
+          <b>Stock</b>
           <b>Action</b>
         </div>
         {list.length > 0 ? (
@@ -57,6 +89,23 @@ const List = ({ url }) => {
               <p>{item.name}</p>
               <p>{item.category}</p>
               <p>${item.price}</p>
+              <p>
+                <span className={`stock-badge ${item.stock === 0 ? 'zero' : item.stock <= 5 ? 'low' : 'ok'}`}>
+                  {item.stock === 0 ? 'Out' : item.stock}
+                </span>
+                <span className="stock-controls">
+                  <button
+                    disabled={busy[item._id] || (item.stock || 0) <= 0}
+                    title={item.stock <= 0 ? 'No stock to decrement' : 'Decrease stock'}
+                    onClick={() => adjustStock(item._id, -1)}
+                  >-</button>
+                  <button
+                    disabled={busy[item._id]}
+                    title="Increase stock"
+                    onClick={() => adjustStock(item._id, +1)}
+                  >+</button>
+                </span>
+              </p>
               <p onClick={() => removeTextile(item._id)} className="cursor">❌</p>
             </div>
           ))
@@ -69,3 +118,7 @@ const List = ({ url }) => {
 };
 
 export default List;
+
+List.propTypes = {
+  url: PropTypes.string.isRequired,
+};
