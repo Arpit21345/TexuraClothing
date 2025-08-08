@@ -14,6 +14,7 @@ import axios from 'axios';
 const App = () => {
   const url = "http://localhost:4000";
   const [isAdminLoggedIn, setIsAdminLoggedIn] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [loading, setLoading] = useState(true);
 
   // Check if admin is already logged in
@@ -80,10 +81,10 @@ const App = () => {
   return (
     <div>
       <ToastContainer />
-      <Navbar onLogout={handleLogout} />
+      <Navbar onLogout={handleLogout} onToggleSidebar={() => setSidebarOpen((s) => !s)} />
       <hr />
       <div className="app-content">
-        <Sidebar />
+        <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
         <Routes>
           <Route path='/' element={<Navigate to="/add" replace />} />
           <Route path='/add' element={<Add url={url} />} />

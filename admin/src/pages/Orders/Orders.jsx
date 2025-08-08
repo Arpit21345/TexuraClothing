@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { useLocation } from 'react-router-dom';
 import './Orders.css';
 import { toast } from 'react-toastify';
 import axios from "axios";
@@ -8,12 +9,16 @@ import { assets } from '../../assets/assets';
 const Orders = ({ url }) => {
 
   const [orders, setOrders] = useState([]);
+  const location = useLocation();
 
   const fetchAllOrders = useCallback(async () => {
     try {
       const adminToken = localStorage.getItem('adminToken');
+      const params = new URLSearchParams(location.search);
+      const userId = params.get('userId') || undefined;
       const response = await axios.get(`${url}/api/order/listorders`, {
-        headers: { token: adminToken }
+        headers: { token: adminToken },
+        params: { userId }
       });
       if (response.data.success) {
         setOrders(response.data.data);
@@ -24,7 +29,7 @@ const Orders = ({ url }) => {
       console.error('Error fetching orders:', error);
       toast.error("Error in fetching orders");
     }
-  }, [url]);
+  }, [url, location.search]);
 
   const statusHandler = async (event, orderId) => {
     try {

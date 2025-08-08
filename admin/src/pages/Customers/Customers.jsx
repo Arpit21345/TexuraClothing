@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { toast } from 'react-toastify';
 import PropTypes from 'prop-types';
@@ -16,9 +17,12 @@ const Customers = ({ url }) => {
     const [totalPages, setTotalPages] = useState(1);
     const [searchTerm, setSearchTerm] = useState('');
 
+    const navigate = useNavigate();
+
     useEffect(() => {
         fetchCustomers();
         fetchStats();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [currentPage, searchTerm, url]);
 
     const fetchCustomers = async () => {
@@ -201,7 +205,7 @@ const Customers = ({ url }) => {
                                                 </span>
                                             </td>
                                             <td>
-                                                <button className="view-orders-btn">
+                                                <button className="view-orders-btn" onClick={() => navigate(`/orders?userId=${customer._id}`)}>
                                                     View Orders
                                                 </button>
                                             </td>
@@ -213,6 +217,68 @@ const Customers = ({ url }) => {
                     </table>
                 )}
             </div>
+
+                        {/* Mobile Cards (shown on small screens) */}
+                        {!loading && (
+                            <div className="customers-cards">
+                                {customers.length === 0 ? (
+                                    <div className="no-data">{searchTerm ? 'No customers found matching your search' : 'No customers found'}</div>
+                                ) : (
+                                    customers.map((customer) => {
+                                        const activity = getActivityStatus(customer.lastLogin);
+                                        return (
+                                            <div key={customer._id} className="customer-card">
+                                                <div className="card-header">
+                                                    <div className="card-profile">
+                                                        {customer.profilePicture ? (
+                                                            <img 
+                                                                src={`${url}/images/${customer.profilePicture}`} 
+                                                                alt="Profile" 
+                                                                className="profile-pic"
+                                                            />
+                                                        ) : (
+                                                            <div className="profile-placeholder">
+                                                                {customer.name.charAt(0).toUpperCase()}
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                    <div className="card-title">
+                                                        <h4>{customer.name}</h4>
+                                                        <span className="customer-id">ID: {customer._id.slice(-8)}</span>
+                                                    </div>
+                                                    <span className={`status ${activity.class}`}>{activity.status}</span>
+                                                </div>
+                                                <div className="card-body">
+                                                    <div className="row">
+                                                        <span className="label">Email</span>
+                                                        <span className="value">{customer.email}</span>
+                                                    </div>
+                                                    <div className="row">
+                                                        <span className="label">Phone</span>
+                                                        <span className="value">{customer.phone || 'Not provided'}</span>
+                                                    </div>
+                                                    <div className="row two-col">
+                                                        <div>
+                                                            <span className="label">Joined</span>
+                                                            <span className="value">{formatDate(customer.createdAt)}</span>
+                                                        </div>
+                                                        <div>
+                                                            <span className="label">Last Login</span>
+                                                            <span className="value">{formatDate(customer.lastLogin)}</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div className="card-actions">
+                                                    <button className="view-orders-btn" onClick={() => navigate(`/orders?userId=${customer._id}`)}>
+                                                        View Orders
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        );
+                                    })
+                                )}
+                            </div>
+                        )}
 
             {/* Pagination */}
             {totalPages > 1 && (

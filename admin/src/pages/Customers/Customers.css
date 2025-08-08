@@ -342,11 +342,31 @@
         max-width: none;
     }
     
-    .customers-table th,
-    .customers-table td {
-        padding: 10px 8px;
-        font-size: 13px;
+    /* Hide large table on small screens; use cards */
+    .customers-table-container { display: none; }
+    .customers-cards { display: grid; gap: 12px; }
+    .customer-card {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        border: 1px solid #e0e0e0;
     }
+    .customer-card .card-header {
+        display: grid;
+        grid-template-columns: 48px 1fr auto;
+        align-items: center;
+        gap: 12px;
+        padding: 12px 12px 0 12px;
+    }
+    .customer-card .card-title h4 { margin: 0; font-size: 16px; }
+    .customer-card .card-title .customer-id { display: block; font-size: 12px; color: #666; }
+    .customer-card .card-body { padding: 8px 12px 12px 12px; display: flex; flex-direction: column; gap: 8px; }
+    .customer-card .row { display: flex; justify-content: space-between; gap: 12px; font-size: 13px; }
+    .customer-card .row.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .customer-card .label { color: #666; }
+    .customer-card .value { color: #333; font-weight: 500; }
+    .customer-card .card-actions { padding: 0 12px 12px 12px; }
+    .customer-card .view-orders-btn { width: 100%; }
     
     .pagination {
         flex-direction: column;
@@ -374,6 +394,7 @@
     .stat-info h3 {
         font-size: 24px;
     }
+    .customer-card .row.two-col { grid-template-columns: 1fr; }
 }
 
 /* Error State Styles */

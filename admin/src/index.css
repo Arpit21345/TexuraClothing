@@ -27,6 +27,12 @@ hr {
   display: flex;
 }
 
+@media (max-width: 900px) {
+  .app-content {
+    gap: 0;
+  }
+}
+
 .cursor {
   cursor: pointer;
 }

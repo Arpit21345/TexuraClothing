@@ -191,7 +191,10 @@ const userOrders = async (req, res) => {
 
 const listOrders = async (req, res) => {
     try {
-        const orders = await orderModel.find({});
+        const { userId } = req.query;
+        const filter = {};
+        if (userId) filter.userId = userId;
+        const orders = await orderModel.find(filter);
         res.json({ success: true, data: orders });
     } catch (error) {
         console.log(error);

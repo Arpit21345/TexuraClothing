@@ -82,6 +82,26 @@
     box-shadow: 0 4px 12px rgba(220, 53, 69, 0.4);
 }
 
+/* Mobile nav helpers */
+.nav-left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.hamburger {
+    display: none;
+    background: transparent;
+    border: none;
+    font-size: 22px;
+    cursor: pointer;
+    padding: 6px 8px;
+    border-radius: 6px;
+}
+.hamburger:hover {
+    background: #f1f3f4;
+}
+
 @media (max-width: 1024px) {
     .navbar {
         padding: 10px 3%;
@@ -104,6 +124,7 @@
     .navbar {
         padding: 8px 2%;
     }
+    .hamburger { display: inline-block; }
     
     .admin-info {
         display: none;
