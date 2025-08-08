@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { toast } from 'react-toastify';
 import PropTypes from 'prop-types';
@@ -19,9 +19,9 @@ const Customers = ({ url }) => {
     useEffect(() => {
         fetchCustomers();
         fetchStats();
-    }, [fetchCustomers, fetchStats]);
+    }, [currentPage, searchTerm, url]);
 
-    const fetchCustomers = useCallback(async () => {
+    const fetchCustomers = async () => {
         try {
             setLoading(true);
             const response = await axios.get(`${url}/api/user/all`, {
@@ -33,8 +33,8 @@ const Customers = ({ url }) => {
             });
 
             if (response.data.success) {
-                setCustomers(response.data.users);
-                setTotalPages(response.data.totalPages);
+                setCustomers(response.data.users || []);
+                setTotalPages(response.data.totalPages || 1);
             } else {
                 toast.error('Failed to fetch customers');
             }
@@ -44,9 +44,9 @@ const Customers = ({ url }) => {
         } finally {
             setLoading(false);
         }
-    }, [url, currentPage, searchTerm]);
+    };
 
-    const fetchStats = useCallback(async () => {
+    const fetchStats = async () => {
         try {
             const response = await axios.get(`${url}/api/user/stats`);
             if (response.data.success) {
@@ -55,7 +55,7 @@ const Customers = ({ url }) => {
         } catch (error) {
             console.error('Error fetching stats:', error);
         }
-    }, [url]);
+    };
 
     const handleSearch = (e) => {
         setSearchTerm(e.target.value);

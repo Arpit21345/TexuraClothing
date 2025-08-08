@@ -242,6 +242,9 @@ const uploadProfilePicture = async (req, res) => {
 // 🟢 GET ALL USERS (FOR ADMIN)
 const getAllUsers = async (req, res) => {
     try {
+        console.log('📊 GET ALL USERS - Admin request received');
+        console.log('Query params:', req.query);
+        
         const { page = 1, limit = 10, search = "" } = req.query;
         
         const query = search ? {
@@ -251,6 +254,9 @@ const getAllUsers = async (req, res) => {
             ]
         } : {};
 
+        console.log('Database query:', query);
+        console.log('Pagination - Page:', page, 'Limit:', limit);
+
         const users = await userModel.find(query)
             .select("-password -cartData")
             .sort({ createdAt: -1 })
@@ -258,6 +264,9 @@ const getAllUsers = async (req, res) => {
             .skip((page - 1) * limit);
 
         const totalUsers = await userModel.countDocuments(query);
+
+        console.log('Found users:', users.length);
+        console.log('Total users:', totalUsers);
 
         res.status(200).json({
             success: true,
@@ -267,14 +276,16 @@ const getAllUsers = async (req, res) => {
             totalPages: Math.ceil(totalUsers / limit)
         });
     } catch (error) {
-        console.error("Get All Users Error:", error);
-        res.status(500).json({ success: false, message: "Internal Server Error" });
+        console.error("❌ Get All Users Error:", error);
+        res.status(500).json({ success: false, message: "Internal Server Error", error: error.message });
     }
 };
 
 // 🟢 GET USER STATISTICS (FOR ADMIN)
 const getUserStats = async (req, res) => {
     try {
+        console.log('📈 GET USER STATS - Admin request received');
+        
         const totalUsers = await userModel.countDocuments();
         const recentUsers = await userModel.countDocuments({
             createdAt: { $gte: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000) } // Last 30 days
@@ -282,6 +293,8 @@ const getUserStats = async (req, res) => {
         const activeUsers = await userModel.countDocuments({
             lastLogin: { $gte: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000) } // Last 7 days
         });
+
+        console.log('Stats calculated:', { totalUsers, recentUsers, activeUsers });
 
         res.status(200).json({
             success: true,
@@ -292,8 +305,8 @@ const getUserStats = async (req, res) => {
             }
         });
     } catch (error) {
-        console.error("Get User Stats Error:", error);
-        res.status(500).json({ success: false, message: "Internal Server Error" });
+        console.error("❌ Get User Stats Error:", error);
+        res.status(500).json({ success: false, message: "Internal Server Error", error: error.message });
     }
 };
 
