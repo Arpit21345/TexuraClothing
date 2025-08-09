@@ -90,7 +90,15 @@ const LoginPopup = ({ setShowLogin }) => {
         {/* Admin Access Link */}
         <div className="admin-access-link">
           <p>
-            Admin? <span onClick={() => window.open('http://localhost:5174', '_blank')}>Login as Admin</span>
+            Admin? {" "}
+            <span
+              onClick={() => {
+                const adminUrl = import.meta.env.VITE_ADMIN_URL || 'https://texura-admin.vercel.app';
+                window.open(adminUrl, '_blank');
+              }}
+            >
+              Login as Admin
+            </span>
           </p>
         </div>
       </form>
