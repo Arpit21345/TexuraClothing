@@ -7,6 +7,7 @@ import PromoCode from "../../components/PromoCode/PromoCode";
 const Cart = () => {
   const { cartItems, textile_list, removeFromCart, getTotalCartAmount, url } =
     useContext(StoreContext);
+  const resolveImg = (base, path) => (path && path.startsWith('http') ? path : `${base}/images/${path || ''}`);
   const [appliedPromo, setAppliedPromo] = useState(null);
   const navigate = useNavigate();
 
@@ -54,7 +55,7 @@ const Cart = () => {
             return (
               <div key={item._id}>
                 <div className="cart-items-title cart-items-item">
-                  <img src={`${url}/images/${item.image}`} alt="" />
+                  <img src={resolveImg(url, item.image)} alt="" />
                   <p>{item.name}</p>
                   <p>${item.price}</p>
                   <p>{cartItems[item._id]}</p>

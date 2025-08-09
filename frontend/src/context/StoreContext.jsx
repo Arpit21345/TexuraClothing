@@ -1,4 +1,4 @@
-import { createContext, useEffect, useState } from "react";
+import { createContext, useEffect, useState, useCallback } from "react";
 import axios from "axios";
 import PropTypes from "prop-types";
 
@@ -6,7 +6,8 @@ export const StoreContext = createContext(null);
 
 const StoreContextProvider = (props) => {
   const [cartItems, setCartItems] = useState({});
-  const url = "http://localhost:4000";
+  // Use axios base URL configured in main.jsx
+  const url = axios.defaults.baseURL;
   const [token, setToken] = useState("");
 
   const [textile_list, setTextileList] = useState([]);
@@ -65,15 +66,15 @@ const StoreContextProvider = (props) => {
     return totalAmount;
   };
 
-  const fetchTextileList = async () => {
+  const fetchTextileList = useCallback(async () => {
     const response = await axios.get(url + "/api/textile/list");
     setTextileList(response.data.data);
-  };
+  }, [url]);
 
-  const loadCartData = async (token) => {
+  const loadCartData = useCallback(async (token) => {
     const response = await axios.post(url + "/api/cart/get", {}, { headers: { token } });
     setCartItems(response.data.cartData);
-  };
+  }, [url]);
 
   useEffect(() => {
     async function loadData() {
@@ -85,7 +86,7 @@ const StoreContextProvider = (props) => {
       }
     }
     loadData();
-  }, []);
+  }, [fetchTextileList, loadCartData]);
 
   const contextValue = {
     textile_list,

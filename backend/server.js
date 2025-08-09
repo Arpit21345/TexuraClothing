@@ -12,27 +12,45 @@ import invoiceRouter from "./routes/invoiceRoute.js";
 import adminRouter from "./routes/adminRoute.js";
 import promoRouter from "./routes/promoRoute.js";
 
-// Get the directory name in ES modules
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Load environment variables with explicit path
+// Loads .env if present locally; on Render it just uses process.env
 dotenv.config({ path: path.join(__dirname, '.env') });
 
-// App config
 const app = express();
 const port = process.env.PORT || 4000;
 
-// Database connection
+// Connect DB
 connectDB();
 
-// Middleware
+// Parse JSON
 app.use(express.json());
-app.use(cors());
 
-// API endpoints
-app.use("/api/textile", textileRouter);
+// CORS allowlist from env (comma-separated, no trailing slashes)
+const allowlist = (process.env.CORS_ORIGINS || "")
+  .split(",")
+  .map(s => s.trim())
+  .filter(Boolean);
+
+// Apply CORS BEFORE routes
+app.use(cors({
+  origin(origin, cb) {
+    // Allow server-to-server (no Origin header)
+    if (!origin) return cb(null, true);
+    if (allowlist.includes(origin)) return cb(null, true);
+    return cb(new Error("Not allowed by CORS: " + origin));
+  },
+  methods: ["GET","POST","PUT","PATCH","DELETE","OPTIONS"],
+  allowedHeaders: ["Content-Type","Authorization","token"],
+  credentials: true
+}));
+
+// Static files
 app.use("/images", express.static('uploads'));
+
+// API routes
+app.use("/api/textile", textileRouter);
 app.use("/api/user", userRouter);
 app.use("/api/cart", cartRouter);
 app.use("/api/order", orderRouter);
@@ -40,14 +58,10 @@ app.use("/api/invoice", invoiceRouter);
 app.use("/api/admin", adminRouter);
 app.use("/api/promo", promoRouter);
 
-app.get("/", (req, res) => {
-    res.send("API is working");
-});
-// this is just to test wether server is running it open a page 
-// with api working written
+// Root + health
+app.get("/", (req, res) => res.send("API is working"));
+app.get("/healthz", (req, res) => res.status(200).send("ok"));
 
-
-// Start server
 app.listen(port, () => {
-    console.log(`Server started on http://localhost:${port}`);
+  console.log(`Server started on http://localhost:${port}`);
 });

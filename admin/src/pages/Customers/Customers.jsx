@@ -19,6 +19,7 @@ const Customers = ({ url }) => {
 
     const navigate = useNavigate();
 
+    const resolveImg = (base, path) => (path && path.startsWith('http') ? path : `${base}/images/${path || ''}`);
     useEffect(() => {
         fetchCustomers();
         fetchStats();
@@ -166,7 +167,7 @@ const Customers = ({ url }) => {
                                                 <div className="profile-cell">
                                                     {customer.profilePicture ? (
                                                         <img 
-                                                            src={`${url}/images/${customer.profilePicture}`} 
+                                                            src={resolveImg(url, customer.profilePicture)} 
                                                             alt="Profile" 
                                                             className="profile-pic"
                                                         />
@@ -232,7 +233,7 @@ const Customers = ({ url }) => {
                                                     <div className="card-profile">
                                                         {customer.profilePicture ? (
                                                             <img 
-                                                                src={`${url}/images/${customer.profilePicture}`} 
+                                                                src={resolveImg(url, customer.profilePicture)} 
                                                                 alt="Profile" 
                                                                 className="profile-pic"
                                                             />

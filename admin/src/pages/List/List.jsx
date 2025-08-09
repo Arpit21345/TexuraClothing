@@ -6,6 +6,7 @@ import PropTypes from "prop-types";
 
 const List = ({ url }) => {
   const [list, setList] = useState([]);
+  const resolveImg = (base, path) => (path && path.startsWith('http') ? path : `${base}/images/${path || ''}`);
   const [busy, setBusy] = useState({});
 
   const fetchList = async () => {
@@ -85,7 +86,7 @@ const List = ({ url }) => {
         {list.length > 0 ? (
           list.map((item, index) => (
             <div key={index} className="list-table-format">
-              <img src={`${url}/images/${item.image}`} alt={item.name} />
+              <img src={resolveImg(url, item.image)} alt={item.name} />
               <p>{item.name}</p>
               <p>{item.category}</p>
               <p>${item.price}</p>

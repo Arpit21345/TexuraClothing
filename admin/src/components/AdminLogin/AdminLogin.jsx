@@ -11,7 +11,8 @@ const AdminLogin = ({ setIsAdminLoggedIn }) => {
   });
   const [loading, setLoading] = useState(false);
 
-  const url = "http://localhost:4000";
+  // Use axios baseURL configured globally in main.jsx
+  const url = axios.defaults.baseURL;
 
   const handleChange = (e) => {
     setFormData({
@@ -25,7 +26,7 @@ const AdminLogin = ({ setIsAdminLoggedIn }) => {
     setLoading(true);
 
     try {
-      const response = await axios.post(`${url}/api/admin/login`, formData);
+  const response = await axios.post(`${url}/api/admin/login`, formData);
       
       if (response.data.success) {
         // Store admin token

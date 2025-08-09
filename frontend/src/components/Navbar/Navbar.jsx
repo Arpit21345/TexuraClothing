@@ -15,6 +15,7 @@ const Navbar = ({ setShowLogin }) => {
   const navigate = useNavigate();
 
   // Fetch user profile to get profile picture
+  const resolveImg = (base, path) => (path && path.startsWith('http') ? path : `${base}/images/${path || ''}`);
   useEffect(() => {
     const fetchUserProfile = async () => {
       if (token) {
@@ -103,7 +104,7 @@ const Navbar = ({ setShowLogin }) => {
             <div className="navbar-profile-pic">
               {userProfile?.profilePicture ? (
                 <img 
-                  src={`${url}/images/${userProfile.profilePicture}`} 
+                  src={resolveImg(url, userProfile.profilePicture)} 
                   alt="Profile" 
                   className="profile-avatar"
                 />

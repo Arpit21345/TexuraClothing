@@ -37,6 +37,7 @@ const Profile = () => {
     const [previewImage, setPreviewImage] = useState('');
 
     // Fetch user profile data
+    const resolveImg = (base, path) => (path && path.startsWith('http') ? path : `${base}/images/${path || ''}`);
     const fetchUserProfile = useCallback(async () => {
         try {
             setLoading(true);
@@ -67,7 +68,7 @@ const Profile = () => {
                 });
                 
                 if (userData.profilePicture) {
-                    setPreviewImage(`${url}/images/${userData.profilePicture}`);
+                    setPreviewImage(resolveImg(url, userData.profilePicture));
                 }
             }
         } catch (error) {
@@ -242,7 +243,7 @@ const Profile = () => {
                 
                 // Update the preview image with the new uploaded image
                 if (response.data.profilePicture) {
-                    setPreviewImage(`${url}/images/${response.data.profilePicture}`);
+                    setPreviewImage(resolveImg(url, response.data.profilePicture));
                 }
                 
                 // Refresh the profile data and navbar

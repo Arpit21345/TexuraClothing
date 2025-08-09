@@ -12,7 +12,8 @@ import 'react-toastify/dist/ReactToastify.css';
 import axios from 'axios';
 
 const App = () => {
-  const url = "http://localhost:4000";
+  // Use axios baseURL configured in main.jsx
+  const url = axios.defaults.baseURL;
   const [isAdminLoggedIn, setIsAdminLoggedIn] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [loading, setLoading] = useState(true);
