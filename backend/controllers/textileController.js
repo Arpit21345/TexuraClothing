@@ -57,9 +57,13 @@ const listtextile = async (req, res) => {
             ];
         }
 
-        // Category filter
+        // Category filter (normalize to handle spacing/case differences like "Home Textiles" vs "HomeTextiles")
         if (category && category !== 'All') {
-            query.category = category;
+            const escapeRegex = (str) => str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+            // Allow optional whitespace between characters in the provided category and ignore case
+            // e.g., "Home Textiles" will match "Home Textiles" and "HomeTextiles"
+            const normalizedPattern = escapeRegex(String(category)).replace(/\s+/g, '\\s*');
+            query.category = new RegExp(`^${normalizedPattern}$`, 'i');
         }
 
         // Price range filter

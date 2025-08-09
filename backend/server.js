@@ -28,19 +28,34 @@ connectDB();
 // JSON body parser
 app.use(express.json());
 
-// CORS allowlist from env (comma-separated, no trailing slashes)
+// CORS allowlist from env (comma-separated, supports wildcards like https://texura-shop-*.vercel.app)
 const allowlist = (process.env.CORS_ORIGINS || "")
     .split(",")
     .map((s) => s.trim())
     .filter(Boolean);
 
+// Helper: wildcard match (only * wildcard supported)
+const isOriginAllowed = (origin) => {
+    if (!origin) return true; // non-browser requests
+    for (const entry of allowlist) {
+        if (entry.includes("*")) {
+            // Escape regex specials, then replace \* with .*
+            const pattern = new RegExp(
+                "^" + entry.replace(/[.+?^${}()|[\\]\\]/g, "\\$&").replace(/\\\*/g, ".*") + "$"
+            );
+            if (pattern.test(origin)) return true;
+        } else if (entry === origin) {
+            return true;
+        }
+    }
+    return false;
+};
+
 // Apply CORS BEFORE routes
 app.use(
     cors({
         origin(origin, cb) {
-            // Allow server-to-server (no Origin header)
-            if (!origin) return cb(null, true);
-            if (allowlist.includes(origin)) return cb(null, true);
+            if (isOriginAllowed(origin)) return cb(null, true);
             return cb(new Error("Not allowed by CORS: " + origin));
         },
         methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],

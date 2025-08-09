@@ -104,7 +104,7 @@ const Add = ({ url }) => {
               <option value="Fabric">Fabric</option>
               <option value="Clothing">Clothing</option>
               <option value="Accessories">Accessories</option>
-              <option value="HomeTextiles">Home Textiles</option>
+              <option value="Home Textiles">Home Textiles</option>
               <option value="Footwear">Footwear</option>
               <option value="Pet Wear">Pet Wear</option>
               <option value="Toddlers">Toddlers</option>
