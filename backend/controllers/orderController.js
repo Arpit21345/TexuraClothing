@@ -6,7 +6,7 @@ import Stripe from "stripe";
 // Don't initialize Stripe here - do it in the function where env vars are available
 
 const placeOrder = async (req, res) => {
-    const frontend_url = "http://localhost:5173";
+    const frontend_url = process.env.FRONTEND_URL || "http://localhost:5173";
 
     try {
         console.log("Place order request body:", req.body);
