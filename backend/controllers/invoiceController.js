@@ -29,37 +29,53 @@ const generateInvoice = async (req, res) => {
         fs.writeFileSync(debugPath, htmlContent);
         console.log("Debug HTML saved to:", debugPath);
         
-        // Create PDF using Puppeteer
-        const browser = await puppeteer.launch({
-            headless: "new", // Use new headless mode
-            args: [
-                '--no-sandbox', 
-                '--disable-setuid-sandbox',
-                '--disable-dev-shm-usage',
-                '--disable-web-security',
-                '--disable-gpu',
-                '--disable-background-timer-throttling',
-                '--disable-backgrounding-occluded-windows',
-                '--disable-renderer-backgrounding'
-            ],
-            timeout: 30000
-        });
-        
+        // Create PDF using Puppeteer (try headless: true, fallback to legacy if needed)
+        let browser;
+        try {
+            browser = await puppeteer.launch({
+                headless: true,
+                args: [
+                    '--no-sandbox',
+                    '--disable-setuid-sandbox',
+                    '--disable-dev-shm-usage',
+                    '--disable-web-security',
+                    '--disable-gpu',
+                    '--disable-background-timer-throttling',
+                    '--disable-backgrounding-occluded-windows',
+                    '--disable-renderer-backgrounding'
+                ],
+                timeout: 30000
+            });
+        } catch (err) {
+            console.error("Puppeteer headless:true launch failed, trying legacy mode:", err);
+            browser = await puppeteer.launch({
+                headless: false,
+                args: [
+                    '--no-sandbox',
+                    '--disable-setuid-sandbox',
+                    '--disable-dev-shm-usage',
+                    '--disable-web-security',
+                    '--disable-gpu',
+                    '--disable-background-timer-throttling',
+                    '--disable-backgrounding-occluded-windows',
+                    '--disable-renderer-backgrounding'
+                ],
+                timeout: 30000
+            });
+        }
+
         const page = await browser.newPage();
-        
         // Set viewport and page settings
         await page.setViewport({
             width: 1200,
             height: 1600,
             deviceScaleFactor: 1
         });
-        
         // Set content and wait for it to load
-        await page.setContent(htmlContent, { 
+        await page.setContent(htmlContent, {
             waitUntil: ['networkidle0', 'domcontentloaded'],
             timeout: 30000
         });
-        
         // Generate PDF with proper settings
         const pdfBuffer = await page.pdf({
             format: 'A4',
@@ -71,11 +87,8 @@ const generateInvoice = async (req, res) => {
                 left: '10mm'
             }
         });
-        
         await browser.close();
-        
         console.log("PDF generated successfully, buffer size:", pdfBuffer.length);
-        
         // Verify PDF buffer is valid
         if (!pdfBuffer || pdfBuffer.length === 0) {
             throw new Error("Generated PDF buffer is empty");
