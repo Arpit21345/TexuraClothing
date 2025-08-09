@@ -84,13 +84,19 @@ const generateInvoice = async (req, res) => {
         // Set response headers for PDF download
         res.setHeader('Content-Type', 'application/pdf');
         res.setHeader('Content-Disposition', `attachment; filename="invoice-${orderId}.pdf"`);
-        
         // Send PDF buffer directly
         res.end(pdfBuffer);
-        
     } catch (error) {
         console.error("Error generating invoice:", error);
-        res.status(500).json({ success: false, message: "Error generating invoice: " + error.message });
+        if (error.stack) console.error(error.stack);
+        // Return debug HTML path for inspection
+        const debugPath = path.join(process.cwd(), 'uploads', `invoice-${req.params.orderId}-debug.html`);
+        res.status(500).json({
+            success: false,
+            message: "Error generating invoice: " + error.message,
+            debugHtml: debugPath,
+            stack: error.stack
+        });
     }
 };
 

@@ -1,22 +1,44 @@
 import textileModel from "../models/textileModel.js";
 import fs from "fs";
+import cloudinary from "../utils/cloudinary.js";
 
-// Add textile Item
+// Add textile Item (now uploads image to Cloudinary for persistence)
 const addtextile = async (req, res) => {
     try {
         if (!req.file) {
             return res.json({ success: false, message: "Image is required" });
         }
 
-        let image_filename = req.file.filename;
+        let image_url = null;
+        // Try Cloudinary upload
+        try {
+            const result = await new Promise((resolve, reject) => {
+                const stream = cloudinary.uploader.upload_stream(
+                    {
+                        folder: "texura/products",
+                        resource_type: "image",
+                        overwrite: true,
+                    },
+                    (error, result) => {
+                        if (error) reject(error);
+                        else resolve(result);
+                    }
+                );
+                stream.end(req.file.buffer);
+            });
+            image_url = result.secure_url;
+        } catch (cloudErr) {
+            console.error("Cloudinary upload failed, falling back to local file:", cloudErr);
+        }
 
+        let image_filename = req.file.filename;
+        // If Cloudinary succeeded, use URL; else fallback to local filename
         const textile = new textileModel({
             name: req.body.name,
             description: req.body.description,
             price: req.body.price,
             category: req.body.category,
-            image: image_filename,
-            // optional stock from request, default to 0 if missing
+            image: image_url || image_filename,
             stock: Number.isFinite(Number(req.body.stock)) ? Number(req.body.stock) : 0
         });
 

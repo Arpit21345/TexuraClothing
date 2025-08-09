@@ -3,10 +3,15 @@ import axios from "axios";
 import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import PropTypes from "prop-types";
+import { assets } from "../../assets/assets";
 
 const List = ({ url }) => {
   const [list, setList] = useState([]);
-  const resolveImg = (base, path) => (path && path.startsWith('http') ? path : `${base}/images/${path || ''}`);
+  const resolveImg = (base, path) => {
+    if (!path) return assets.header_img; // fallback placeholder
+    if (path.startsWith('http')) return path;
+    return `${base}/images/${path}`;
+  };
   const [busy, setBusy] = useState({});
 
   const fetchList = async () => {
