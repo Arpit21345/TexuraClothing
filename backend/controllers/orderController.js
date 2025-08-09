@@ -7,6 +7,10 @@ import Stripe from "stripe";
 
 const placeOrder = async (req, res) => {
     const frontend_url = process.env.FRONTEND_URL || "http://localhost:5173";
+    if (!frontend_url) {
+        console.error("FRONTEND_URL is not set in environment variables!");
+        return res.json({ success: false, message: "Frontend URL is not configured. Please contact administrator." });
+    }
 
     try {
         console.log("Place order request body:", req.body);
