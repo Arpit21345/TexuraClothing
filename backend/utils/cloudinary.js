@@ -1,17 +1,20 @@
 import { v2 as cloudinary } from "cloudinary";
 
-// Prefer CLOUDINARY_URL if provided; otherwise use individual keys
-if (process.env.CLOUDINARY_URL) {
+// Prefer explicit keys if present; otherwise rely on CLOUDINARY_URL from env
+const { CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, CLOUDINARY_API_SECRET, CLOUDINARY_URL } = process.env;
+
+if (CLOUDINARY_CLOUD_NAME && CLOUDINARY_API_KEY && CLOUDINARY_API_SECRET) {
   cloudinary.config({
-    cloudinary_url: process.env.CLOUDINARY_URL,
-  });
-} else {
-  cloudinary.config({
-    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-    api_key: process.env.CLOUDINARY_API_KEY,
-    api_secret: process.env.CLOUDINARY_API_SECRET,
+    cloud_name: CLOUDINARY_CLOUD_NAME,
+    api_key: CLOUDINARY_API_KEY,
+    api_secret: CLOUDINARY_API_SECRET,
     secure: true,
   });
+} else if (CLOUDINARY_URL) {
+  // SDK will read CLOUDINARY_URL automatically from process.env
+  cloudinary.config({ secure: true });
+} else {
+  console.warn("Cloudinary not configured: missing credentials.");
 }
 
 export default cloudinary;

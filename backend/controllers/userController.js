@@ -185,16 +185,7 @@ const uploadProfilePicture = async (req, res) => {
             });
         }
 
-                // Upload to Cloudinary
-                const uploadRes = await cloudinary.uploader.upload_stream(
-                    {
-                        folder: "texura/profile_pictures",
-                        resource_type: "image",
-                        overwrite: true,
-                    },
-                    // callback is handled via a Promise wrapper below
-                );
-                // Because upload_stream uses streams, wrap it in a Promise
+            // Upload to Cloudinary (wrap upload_stream in a Promise)
                 const uploaded = await new Promise((resolve, reject) => {
                     const stream = cloudinary.uploader.upload_stream(
                         { folder: "texura/profile_pictures", resource_type: "image", overwrite: true },

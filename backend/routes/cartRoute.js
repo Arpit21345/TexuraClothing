@@ -6,6 +6,7 @@ const cartRouter = express.Router();
 
 cartRouter.post("/add", authMiddleware, addToCart);
 cartRouter.post("/remove", authMiddleware, removeFromCart);
-cartRouter.get("/get", authMiddleware, getCart); // Changed to GET
+cartRouter.get("/get", authMiddleware, getCart); // Preferred
+cartRouter.post("/get", authMiddleware, getCart); // Backward-compat
 
 export default cartRouter;
