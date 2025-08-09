@@ -7,6 +7,7 @@ const userSchema = new mongoose.Schema({
     cartData: { type: Object, default: {} },
     // New profile fields
     profilePicture: { type: String, default: "" },
+    profilePicturePublicId: { type: String, default: "" },
     phone: { type: String, default: "" },
     address: {
         street: { type: String, default: "" },

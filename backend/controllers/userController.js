@@ -2,6 +2,7 @@ import userModel from "../models/userModel.js";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
 import validator from "validator";
+import cloudinary from "../utils/cloudinary.js";
 
 // Function to create JWT token with expiration
 const createToken = (id) => {
@@ -163,7 +164,7 @@ const uploadProfilePicture = async (req, res) => {
             return res.status(400).json({ success: false, message: "User ID not found in request" });
         }
         
-        if (!req.file) {
+    if (!req.file) {
             return res.status(400).json({ success: false, message: "No file uploaded" });
         }
 
@@ -184,7 +185,26 @@ const uploadProfilePicture = async (req, res) => {
             });
         }
 
-        const profilePicture = req.file.filename;
+                // Upload to Cloudinary
+                const uploadRes = await cloudinary.uploader.upload_stream(
+                    {
+                        folder: "texura/profile_pictures",
+                        resource_type: "image",
+                        overwrite: true,
+                    },
+                    // callback is handled via a Promise wrapper below
+                );
+                // Because upload_stream uses streams, wrap it in a Promise
+                const uploaded = await new Promise((resolve, reject) => {
+                    const stream = cloudinary.uploader.upload_stream(
+                        { folder: "texura/profile_pictures", resource_type: "image", overwrite: true },
+                        (error, result) => {
+                            if (error) return reject(error);
+                            resolve(result);
+                        }
+                    );
+                    stream.end(req.file.buffer);
+                });
         
         console.log("Looking for user with ID:", userId); // Debug log
         
@@ -197,24 +217,21 @@ const uploadProfilePicture = async (req, res) => {
 
         console.log("User found:", currentUser.name); // Debug log
 
-        // Delete old profile picture if it exists
-        if (currentUser.profilePicture) {
-            try {
-                const fs = await import('fs');
-                const path = await import('path');
-                const oldImagePath = path.join('uploads', currentUser.profilePicture);
-                if (fs.existsSync(oldImagePath)) {
-                    fs.unlinkSync(oldImagePath);
+                // If previous image was on Cloudinary, delete it by public_id (if we stored it)
+                if (currentUser.profilePicturePublicId) {
+                    try {
+                        await cloudinary.uploader.destroy(currentUser.profilePicturePublicId);
+                    } catch (e) {
+                        console.log("Could not delete old Cloudinary image:", e?.message);
+                    }
                 }
-            } catch (deleteError) {
-                console.log('Could not delete old profile picture:', deleteError);
-                // Continue anyway, don't fail the upload
-            }
-        }
         
-        const user = await userModel.findByIdAndUpdate(
+                const user = await userModel.findByIdAndUpdate(
             userId,
-            { profilePicture },
+                        { 
+                            profilePicture: uploaded.secure_url,
+                            profilePicturePublicId: uploaded.public_id,
+                        },
             { new: true, select: "-password" }
         );
 
@@ -223,25 +240,11 @@ const uploadProfilePicture = async (req, res) => {
         res.status(200).json({ 
             success: true, 
             message: "Profile picture updated successfully", 
-            profilePicture: profilePicture,
+            profilePicture: uploaded.secure_url,
             user: user
         });
     } catch (error) {
         console.error("Upload Profile Picture Error:", error);
-        
-        // Clean up uploaded file if there was an error
-        if (req.file) {
-            try {
-                const fs = await import('fs');
-                const path = await import('path');
-                const uploadPath = path.join('uploads', req.file.filename);
-                if (fs.existsSync(uploadPath)) {
-                    fs.unlinkSync(uploadPath);
-                }
-            } catch (cleanupError) {
-                console.log('Could not clean up uploaded file:', cleanupError);
-            }
-        }
         
         res.status(500).json({ success: false, message: "Internal Server Error" });
     }
