@@ -2,6 +2,7 @@ import orderModel from "../models/orderModel.js";
 import userModel from "../models/userModel.js";
 import textileModel from "../models/textileModel.js";
 import puppeteer from "puppeteer";
+import os from 'os';
 import fs from 'fs';
 import path from 'path';
 
@@ -31,7 +32,49 @@ const generateInvoice = async (req, res) => {
         
         // Create PDF using Puppeteer (try headless: true, fallback to legacy if needed)
         let browser;
+        // Ensure cache dir is set for puppeteer
+        const PUPPETEER_CACHE_DIR = process.env.PUPPETEER_CACHE_DIR || path.join(process.cwd(), '.puppeteer-cache');
+        process.env.PUPPETEER_CACHE_DIR = PUPPETEER_CACHE_DIR;
+        // Compute executable path from cache (linux x64 path)
+        // Puppeteer stores chrome under: <cache>/chrome/<version>/chrome-linux/chrome
+        const chromeRoot = path.join(PUPPETEER_CACHE_DIR, 'chrome');
+        let executablePath;
         try {
+            const versions = fs.readdirSync(chromeRoot).filter((d) => d && !d.startsWith('.'));
+            if (versions.length > 0) {
+                // pick latest
+                const latest = versions.sort().pop();
+                const platform = os.platform();
+                if (platform === 'win32') {
+                    executablePath = path.join(chromeRoot, latest, 'chrome-win', 'chrome.exe');
+                } else if (platform === 'darwin') {
+                    executablePath = path.join(chromeRoot, latest, 'chrome-mac', 'Chromium.app', 'Contents', 'MacOS', 'Chromium');
+                } else {
+                    executablePath = path.join(chromeRoot, latest, 'chrome-linux', 'chrome');
+                }
+            }
+        } catch (e) {
+            console.warn('Unable to resolve cached Chrome path:', e.message);
+        }
+
+        try {
+            browser = await puppeteer.launch({
+                headless: true,
+                executablePath,
+                args: [
+                    '--no-sandbox',
+                    '--disable-setuid-sandbox',
+                    '--disable-dev-shm-usage',
+                    '--disable-web-security',
+                    '--disable-gpu',
+                    '--disable-background-timer-throttling',
+                    '--disable-backgrounding-occluded-windows',
+                    '--disable-renderer-backgrounding'
+                ],
+                timeout: 60000
+            });
+        } catch (err) {
+            console.error('Puppeteer launch failed (explicit path). Falling back without explicit path:', err);
             browser = await puppeteer.launch({
                 headless: true,
                 args: [
@@ -44,23 +87,7 @@ const generateInvoice = async (req, res) => {
                     '--disable-backgrounding-occluded-windows',
                     '--disable-renderer-backgrounding'
                 ],
-                timeout: 30000
-            });
-        } catch (err) {
-            console.error("Puppeteer headless:true launch failed, trying legacy mode:", err);
-            browser = await puppeteer.launch({
-                headless: false,
-                args: [
-                    '--no-sandbox',
-                    '--disable-setuid-sandbox',
-                    '--disable-dev-shm-usage',
-                    '--disable-web-security',
-                    '--disable-gpu',
-                    '--disable-background-timer-throttling',
-                    '--disable-backgrounding-occluded-windows',
-                    '--disable-renderer-backgrounding'
-                ],
-                timeout: 30000
+                timeout: 60000
             });
         }
 

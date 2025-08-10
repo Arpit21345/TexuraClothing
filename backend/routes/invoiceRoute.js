@@ -4,6 +4,9 @@ import authMiddleware from "../middleware/auth.js";
 
 const invoiceRouter = express.Router();
 
+// Allow larger HTML payload for invoice generation
+invoiceRouter.use(express.json({ limit: '2mb' }));
+
 // Get invoice data (for frontend to generate HTML)
 invoiceRouter.get("/data/:orderId", authMiddleware, getInvoiceData);
 

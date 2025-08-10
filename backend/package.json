@@ -5,8 +5,9 @@
   "main": "server.js",
   "type": "module",
   "scripts": {
-    "server": "nodemon server.js",
-    "setup-admin": "node setup-admin.js"
+  "server": "nodemon server.js",
+  "setup-admin": "node setup-admin.js",
+  "postinstall": "PUPPETEER_CACHE_DIR=.puppeteer-cache npx puppeteer browsers install chrome"
   },
   "author": "",
   "license": "ISC",
