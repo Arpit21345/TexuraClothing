@@ -60,6 +60,7 @@ app.use(
         },
         methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
         allowedHeaders: ["Content-Type", "Authorization", "token"],
+    exposedHeaders: ["Content-Disposition"],
         credentials: true,
     })
 );

@@ -5,6 +5,7 @@ import puppeteer from "puppeteer";
 import os from 'os';
 import fs from 'fs';
 import path from 'path';
+import cloudinary from "../utils/cloudinary.js";
 
 // Generate PDF Invoice from HTML content
 const generateInvoice = async (req, res) => {
@@ -30,37 +31,13 @@ const generateInvoice = async (req, res) => {
         fs.writeFileSync(debugPath, htmlContent);
         console.log("Debug HTML saved to:", debugPath);
         
-        // Create PDF using Puppeteer (try headless: true, fallback to legacy if needed)
+        // Create PDF using Puppeteer (prefer Puppeteer's own executablePath)
         let browser;
-        // Ensure cache dir is set for puppeteer
-        const PUPPETEER_CACHE_DIR = process.env.PUPPETEER_CACHE_DIR || path.join(process.cwd(), '.puppeteer-cache');
-        process.env.PUPPETEER_CACHE_DIR = PUPPETEER_CACHE_DIR;
-        // Compute executable path from cache (linux x64 path)
-        // Puppeteer stores chrome under: <cache>/chrome/<version>/chrome-linux/chrome
-        const chromeRoot = path.join(PUPPETEER_CACHE_DIR, 'chrome');
-        let executablePath;
-        try {
-            const versions = fs.readdirSync(chromeRoot).filter((d) => d && !d.startsWith('.'));
-            if (versions.length > 0) {
-                // pick latest
-                const latest = versions.sort().pop();
-                const platform = os.platform();
-                if (platform === 'win32') {
-                    executablePath = path.join(chromeRoot, latest, 'chrome-win', 'chrome.exe');
-                } else if (platform === 'darwin') {
-                    executablePath = path.join(chromeRoot, latest, 'chrome-mac', 'Chromium.app', 'Contents', 'MacOS', 'Chromium');
-                } else {
-                    executablePath = path.join(chromeRoot, latest, 'chrome-linux', 'chrome');
-                }
-            }
-        } catch (e) {
-            console.warn('Unable to resolve cached Chrome path:', e.message);
-        }
-
+        const execPath = typeof puppeteer.executablePath === 'function' ? puppeteer.executablePath() : undefined;
         try {
             browser = await puppeteer.launch({
                 headless: true,
-                executablePath,
+                executablePath: execPath,
                 args: [
                     '--no-sandbox',
                     '--disable-setuid-sandbox',
@@ -74,7 +51,7 @@ const generateInvoice = async (req, res) => {
                 timeout: 60000
             });
         } catch (err) {
-            console.error('Puppeteer launch failed (explicit path). Falling back without explicit path:', err);
+            console.error('Puppeteer launch failed (execPath:', execPath, '). Retrying without explicit path:', err);
             browser = await puppeteer.launch({
                 headless: true,
                 args: [
@@ -121,10 +98,33 @@ const generateInvoice = async (req, res) => {
             throw new Error("Generated PDF buffer is empty");
         }
         
-        // Set response headers for PDF download
+        // If client requests storage, upload to Cloudinary and return URL
+        if (req.query.store === 'true') {
+            try {
+                const uploadResult = await new Promise((resolve, reject) => {
+                    const uploadStream = cloudinary.uploader.upload_stream(
+                        {
+                            folder: 'texura/invoices',
+                            resource_type: 'raw',
+                            public_id: `invoice-${orderId}`,
+                            overwrite: true
+                        },
+                        (error, result) => {
+                            if (error) reject(error);
+                            else resolve(result);
+                        }
+                    );
+                    uploadStream.end(pdfBuffer);
+                });
+                return res.json({ success: true, url: uploadResult.secure_url });
+            } catch (e) {
+                console.error('Cloudinary upload failed, falling back to direct download:', e);
+            }
+        }
+
+        // Default: stream PDF to client for download
         res.setHeader('Content-Type', 'application/pdf');
         res.setHeader('Content-Disposition', `attachment; filename="invoice-${orderId}.pdf"`);
-        // Send PDF buffer directly
         res.end(pdfBuffer);
     } catch (error) {
         console.error("Error generating invoice:", error);
