@@ -28,23 +28,35 @@ connectDB();
 // JSON body parser
 app.use(express.json());
 
-// CORS allowlist from env (comma-separated, supports wildcards like https://texura-shop-*.vercel.app)
-const allowlist = (process.env.CORS_ORIGINS || "")
+// Build CORS allowlist from envs (supports wildcards like https://texura-shop-*.vercel.app)
+const normalizeOrigin = (s) => (s || "").trim().replace(/\/$/, "");
+const unique = (arr) => Array.from(new Set(arr.filter(Boolean)));
+const envList = (process.env.CORS_ORIGINS || "")
     .split(",")
-    .map((s) => s.trim())
-    .filter(Boolean);
+    .map(normalizeOrigin);
+const derived = [
+    normalizeOrigin(process.env.FRONTEND_URL),
+    normalizeOrigin(process.env.ADMIN_FRONTEND_URL),
+];
+const allowlist = unique([...envList, ...derived]);
 
 // Helper: wildcard match (only * wildcard supported)
+const toWildcardRegex = (pattern) => {
+    const escaped = pattern.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    const withWildcards = escaped.replace(/\\\*/g, ".*");
+    return new RegExp(`^${withWildcards}$`);
+};
+
 const isOriginAllowed = (origin) => {
-    if (!origin) return true; // non-browser requests
+    if (!origin) return true; // non-browser requests / server-to-server
+    if (allowlist.length === 0) return true; // safe fallback when not configured
+    const o = normalizeOrigin(origin);
     for (const entry of allowlist) {
+        if (!entry) continue;
         if (entry.includes("*")) {
-            // Escape regex specials, then replace \* with .*
-            const pattern = new RegExp(
-                "^" + entry.replace(/[.+?^${}()|[\\]\\]/g, "\\$&").replace(/\\\*/g, ".*") + "$"
-            );
-            if (pattern.test(origin)) return true;
-        } else if (entry === origin) {
+            const re = toWildcardRegex(entry);
+            if (re.test(o)) return true;
+        } else if (normalizeOrigin(entry) === o) {
             return true;
         }
     }
