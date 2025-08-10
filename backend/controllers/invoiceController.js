@@ -266,6 +266,7 @@ const generateInvoice = async (req, res) => {
             success: false,
             message: "Error generating invoice: " + error.message,
             debugHtml: debugPath,
+            fallbackUrl: `/api/invoice/html/${req.params.orderId}`,
             stack: error.stack
         });
     }
@@ -369,3 +370,18 @@ const puppeteerDiag = async (req, res) => {
 };
 
 export { puppeteerDiag };
+
+// Fallback: return invoice HTML for browser "Print to PDF"
+const getInvoiceHtml = async (req, res) => {
+    try {
+        const { orderId } = req.params;
+        const data = await fetchInvoiceData(orderId);
+        const html = buildInvoiceHtml(data);
+        res.setHeader('Content-Type', 'text/html; charset=utf-8');
+        return res.status(200).send(html);
+    } catch (e) {
+        return res.status(500).send(`<pre>Failed to build invoice HTML: ${e.message}</pre>`);
+    }
+};
+
+export { getInvoiceHtml };

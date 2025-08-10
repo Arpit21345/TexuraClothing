@@ -1,5 +1,5 @@
 import express from "express";
-import { generateInvoice, getInvoiceData, generateInvoiceGet, puppeteerDiag } from "../controllers/invoiceController.js";
+import { generateInvoice, getInvoiceData, generateInvoiceGet, puppeteerDiag, getInvoiceHtml } from "../controllers/invoiceController.js";
 import authMiddleware from "../middleware/auth.js";
 
 const invoiceRouter = express.Router();
@@ -18,5 +18,8 @@ invoiceRouter.get("/generate/:orderId", authMiddleware, generateInvoiceGet);
 
 // Diagnostics (protected): Puppeteer environment
 invoiceRouter.get("/diag/puppeteer", authMiddleware, puppeteerDiag);
+
+// Fallback HTML (auth-protected): allows browser Print-to-PDF
+invoiceRouter.get("/html/:orderId", authMiddleware, getInvoiceHtml);
 
 export default invoiceRouter;
