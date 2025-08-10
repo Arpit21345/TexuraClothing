@@ -91,26 +91,29 @@ const placeOrder = async (req, res) => {
         await userModel.findByIdAndUpdate(req.body.userId, { cartData: {} });
         console.log("Cart cleared for user:", req.body.userId);
 
+        // Helper to convert to smallest currency unit (paise) as an integer
+        const toPaise = (v) => {
+            const n = Number(v || 0);
+            return Math.round(n * 100);
+        };
+
         const line_items = req.body.items.map((item) => ({
             price_data: {
                 currency: "inr",
-                product_data: {
-                    name: item.name,
-                },
-                unit_amount: item.price * 100 * 80,
+                product_data: { name: item.name },
+                unit_amount: toPaise(item.price), // must be an integer
             },
-            quantity: item.quantity,
+            quantity: Number(item.quantity) || 1,
         }));
 
-        // Only add delivery fee if there are items
-        if (req.body.amount > 0) {
+        // Only add delivery fee if provided and > 0
+        const deliveryCharge = Number(req.body.deliveryCharge || req.body.shipping || 0);
+        if (deliveryCharge > 0) {
             line_items.push({
                 price_data: {
                     currency: "inr",
-                    product_data: {
-                        name: "Delivery Charges",
-                    },
-                    unit_amount: 2 * 100 * 80,
+                    product_data: { name: "Delivery Charges" },
+                    unit_amount: toPaise(deliveryCharge),
                 },
                 quantity: 1,
             });

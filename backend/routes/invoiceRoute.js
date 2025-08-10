@@ -1,5 +1,5 @@
 import express from "express";
-import { generateInvoice, getInvoiceData, generateInvoiceGet } from "../controllers/invoiceController.js";
+import { generateInvoice, getInvoiceData, generateInvoiceGet, puppeteerDiag } from "../controllers/invoiceController.js";
 import authMiddleware from "../middleware/auth.js";
 
 const invoiceRouter = express.Router();
@@ -15,5 +15,8 @@ invoiceRouter.post("/generate/:orderId", authMiddleware, generateInvoice);
 
 // GET variant: server-side HTML build for direct download
 invoiceRouter.get("/generate/:orderId", authMiddleware, generateInvoiceGet);
+
+// Diagnostics (protected): Puppeteer environment
+invoiceRouter.get("/diag/puppeteer", authMiddleware, puppeteerDiag);
 
 export default invoiceRouter;

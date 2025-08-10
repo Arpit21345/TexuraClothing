@@ -5,6 +5,7 @@ import puppeteer from "puppeteer";
 import fs from 'fs';
 import path from 'path';
 import cloudinary from "../utils/cloudinary.js";
+import { launchBrowser } from "../utils/puppeteerLaunch.js";
 
 // Internal: fetch invoice data for HTML generation
 const fetchInvoiceData = async (orderId) => {
@@ -146,56 +147,7 @@ const generateInvoice = async (req, res) => {
     console.log("Debug HTML saved to:", debugPath);
         
         // Create PDF using Puppeteer (standard, minimal launch)
-        let browser;
-        const detectedExec = typeof puppeteer.executablePath === 'function' ? puppeteer.executablePath() : 'unknown';
-        console.log('Puppeteer executablePath():', detectedExec);
-        try {
-            browser = await puppeteer.launch({
-                headless: true,
-                args: [
-                    '--no-sandbox',
-                    '--disable-setuid-sandbox',
-                    '--disable-dev-shm-usage'
-                ],
-                timeout: 60000
-            });
-        } catch (err) {
-            console.error('Puppeteer launch failed (default). Will try fallbacks:', err);
-            // Fallbacks: use explicit executablePath if available
-            const candidates = [];
-            if (process.env.PUPPETEER_EXECUTABLE_PATH) {
-                candidates.push(process.env.PUPPETEER_EXECUTABLE_PATH);
-            }
-            try {
-                const ep = typeof puppeteer.executablePath === 'function' ? puppeteer.executablePath() : undefined;
-                if (ep) candidates.push(ep);
-            } catch (_) { /* ignore */ }
-
-            let lastErr = err;
-            for (const execPath of candidates) {
-                try {
-                    console.log('Retrying puppeteer.launch with executablePath:', execPath);
-                    browser = await puppeteer.launch({
-                        headless: true,
-                        executablePath: execPath,
-                        args: [
-                            '--no-sandbox',
-                            '--disable-setuid-sandbox',
-                            '--disable-dev-shm-usage'
-                        ],
-                        timeout: 60000
-                    });
-                    break;
-                } catch (e2) {
-                    console.error('Fallback puppeteer launch failed with path:', execPath, e2);
-                    lastErr = e2;
-                }
-            }
-
-            if (!browser) {
-                throw lastErr;
-            }
-        }
+    const browser = await launchBrowser();
 
     const page = await browser.newPage();
         // Set viewport and page settings
@@ -272,44 +224,7 @@ const generateInvoice = async (req, res) => {
                 fs.writeFileSync(debugPath, html);
 
                 // Launch browser with existing flags and possible fallbacks
-                let browser;
-                try {
-                    browser = await puppeteer.launch({
-                        headless: true,
-                        args: [
-                            '--no-sandbox',
-                            '--disable-setuid-sandbox',
-                            '--disable-dev-shm-usage'
-                        ],
-                        timeout: 60000
-                    });
-                } catch (err) {
-                    console.error('Puppeteer launch failed (default). Will try fallbacks:', err);
-                    const candidates = [];
-                    if (process.env.PUPPETEER_EXECUTABLE_PATH) candidates.push(process.env.PUPPETEER_EXECUTABLE_PATH);
-                    try { const ep = typeof puppeteer.executablePath === 'function' ? puppeteer.executablePath() : undefined; if (ep) candidates.push(ep); } catch (_) {}
-                    let lastErr = err;
-                    for (const execPath of candidates) {
-                        try {
-                            console.log('Retrying puppeteer.launch with executablePath:', execPath);
-                            browser = await puppeteer.launch({
-                                headless: true,
-                                executablePath: execPath,
-                                args: [
-                                    '--no-sandbox',
-                                    '--disable-setuid-sandbox',
-                                    '--disable-dev-shm-usage'
-                                ],
-                                timeout: 60000
-                            });
-                            break;
-                        } catch (e2) {
-                            console.error('Fallback puppeteer launch failed with path:', execPath, e2);
-                            lastErr = e2;
-                        }
-                    }
-                    if (!browser) throw lastErr;
-                }
+                const browser = await launchBrowser();
 
                 const page = await browser.newPage();
                 await page.setViewport({ width: 1200, height: 1600, deviceScaleFactor: 1 });
@@ -414,3 +329,43 @@ const generateInvoiceGet = async (req, res) => {
 };
 
 export { generateInvoiceGet };
+
+// Diagnostics: expose puppeteer executable and environment info (auth-protected)
+const puppeteerDiag = async (req, res) => {
+    if (String(process.env.ENABLE_PPTR_DIAG || 'false').toLowerCase() !== 'true') {
+        return res.status(404).json({ success: false, message: 'Not found' });
+    }
+    try {
+        const reportedExec = (() => {
+            try { return typeof puppeteer.executablePath === 'function' ? puppeteer.executablePath() : undefined; } catch (_) { return undefined; }
+        })();
+        const envExec = process.env.PUPPETEER_EXECUTABLE_PATH;
+        const cacheDir = process.env.PUPPETEER_CACHE_DIR;
+        const fsExists = (p) => {
+            try { return p ? fs.existsSync(p) : false; } catch { return false; }
+        };
+        const details = {
+            platform: process.platform,
+            arch: process.arch,
+            node: process.version,
+            reportedExec,
+            reportedExecExists: fsExists(reportedExec),
+            envExec,
+            envExecExists: fsExists(envExec),
+            cacheDir,
+            cacheDirExists: fsExists(cacheDir),
+        };
+        // Optionally list chrome folders inside cache for quick inspection
+        try {
+            if (cacheDir && fsExists(cacheDir)) {
+                const entries = fs.readdirSync(cacheDir, { withFileTypes: true }).map(e => ({ name: e.name, dir: e.isDirectory() }));
+                details.cacheEntries = entries;
+            }
+        } catch { /* ignore listing errors */ }
+        return res.json({ success: true, data: details });
+    } catch (e) {
+        return res.status(500).json({ success: false, message: e.message });
+    }
+};
+
+export { puppeteerDiag };
