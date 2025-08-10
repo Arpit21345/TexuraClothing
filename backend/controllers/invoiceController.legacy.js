@@ -45,41 +45,8 @@ const generateInvoice = async (req, res) => {
                 timeout: 60000
             });
         } catch (err) {
-            console.error('Puppeteer launch failed (default). Will try fallbacks:', err);
-            // Fallbacks: use explicit executablePath if available
-            const candidates = [];
-            if (process.env.PUPPETEER_EXECUTABLE_PATH) {
-                candidates.push(process.env.PUPPETEER_EXECUTABLE_PATH);
-            }
-            try {
-                const ep = typeof puppeteer.executablePath === 'function' ? puppeteer.executablePath() : undefined;
-                if (ep) candidates.push(ep);
-            } catch (_) { /* ignore */ }
-
-            let lastErr = err;
-            for (const execPath of candidates) {
-                try {
-                    console.log('Retrying puppeteer.launch with executablePath:', execPath);
-                    browser = await puppeteer.launch({
-                        headless: true,
-                        executablePath: execPath,
-                        args: [
-                            '--no-sandbox',
-                            '--disable-setuid-sandbox',
-                            '--disable-dev-shm-usage'
-                        ],
-                        timeout: 60000
-                    });
-                    break;
-                } catch (e2) {
-                    console.error('Fallback puppeteer launch failed with path:', execPath, e2);
-                    lastErr = e2;
-                }
-            }
-
-            if (!browser) {
-                throw lastErr;
-            }
+            console.error('Puppeteer launch failed:', err);
+            throw err;
         }
 
     const page = await browser.newPage();
