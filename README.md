@@ -1,5 +1,8 @@
 # TexuraClothing - Full Stack E-Commerce Platform
 
+Texura Shop link  ===>>>>   https://texura-shop.vercel.app/
+Texura Admin link ===>>>>   https://texura-admin.vercel.app/
+
 A modern, responsive e-commerce platform for textile and clothing sales built with the MERN stack (MongoDB, Express.js, React.js, Node.js).
 
 ## 🌟 Features
